@@ -3,6 +3,7 @@ import numpy as np
 import pydart
 from fileinfoworld import FileInfoWorld
 from controller import Controller
+import gltools
 
 
 class Simulation(object):
@@ -39,7 +40,11 @@ class Simulation(object):
         logger.info('set the initial pose OK')
 
     def reset(self):
-        self.skel.q = self.ref.pose_at(0, skel_id=0)
+        init_pose = np.array(self.ref.pose_at(0, skel_id=0))
+        init_pose[2] -= 0.15
+        init_pose[3] += 0.07
+        init_pose[4] += 0.07
+        self.skel.q = init_pose
         self.skel.qdot = np.zeros(self.skel.ndofs)
         self.world.reset()
         self.logger.info('reset OK')
@@ -55,7 +60,11 @@ class Simulation(object):
         self.world.set_frame(idx)
 
     def render(self):
+        gltools.render_COM(self.skel)
         self.world.render()
+
+    def contacts(self):
+        return self.world.contacts()
 
     def key_pressed(self, key):
         self.logger.info('key pressed: [%s]' % key)
