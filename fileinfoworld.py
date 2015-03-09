@@ -43,3 +43,6 @@ class FileInfoWorld(object):
             logger.info('parsing %s OK' % filename)
         n = len(self.skels)
         self.pose = [data[i * n:(i + 1) * n] for i in range(self.num_frames)]
+
+    def pose_at(self, frame_index, skel_id):
+        return self.pose[frame_index][skel_id]
