@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.linalg import inv
+from jacobian_transpose import JTController
 
 
 class Controller:
@@ -17,14 +18,12 @@ class Controller:
 
         # Jacobian transpose
         self.jt = JTController(self.skel)
-        for i, b in enumerate(self.skel.dofs):
-            print i, b.name
 
     def update_target_by_frame(self, frame_idx):
         if frame_idx < self.ref.num_frames:
             self.qhat = self.ref.pose_at(frame_idx, skel_id=0)
-            # I = self.skel.dof_indices(['j_heel_left_1'])
-            # self.qhat[I] += 1.0
+            I = self.skel.dof_indices(['j_heel_left_1', 'j_heel_right_1'])
+            self.qhat[I] += 0.2
 
     def compute(self):
         skel = self.skel
@@ -41,27 +40,4 @@ class Controller:
 
         # Make sure the first six are zero
         tau[:6] = 0
-        return tau
-
-
-class JTController:
-    """
-    # Usage
-    self.jt = JTController(self.skel)
-    tau += self.jt.apply( ["l_hand", "r_hand"], f )
-    """
-    def __init__(self, _skel):
-        self.skel = _skel
-
-    def apply(self, bodynames, f):
-        if not isinstance(bodynames, list):
-            bodynames = [bodynames]
-        f = np.array(f)
-
-        tau = np.zeros(self.skel.ndofs)
-        for bodyname in bodynames:
-            # J = self.skel.getBodyNodeWorldLinearJacobian(bodyname)
-            J = self.skel.body(bodyname).world_linear_jacobian()
-            JT = np.transpose(J)
-            tau += JT.dot(f)
         return tau

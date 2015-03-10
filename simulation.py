@@ -4,6 +4,7 @@ import pydart
 from fileinfoworld import FileInfoWorld
 from controller import Controller
 import gltools
+import posetools
 
 
 class Simulation(object):
@@ -35,15 +36,21 @@ class Simulation(object):
                                           self.world.dt,
                                           self.ref)
 
+        # For check the target
+        self.target_index = 0
+
         # Reset the scene
         self.reset()
         logger.info('set the initial pose OK')
 
     def reset(self):
-        init_pose = np.array(self.ref.pose_at(0, skel_id=0))
-        init_pose[2] -= 0.15
-        init_pose[3] += 0.07
+        init_pose = self.ref.pose_at(0, skel_id=0)
+        init_pose[2] -= 0.25
+        init_pose[3] += 0.19
         init_pose[4] += 0.07
+        I = self.skel.dof_indices(['j_heel_left_1', 'j_heel_right_1'])
+        init_pose[I] += 0.2
+
         self.skel.q = init_pose
         self.skel.qdot = np.zeros(self.skel.ndofs)
         self.world.reset()
@@ -68,3 +75,11 @@ class Simulation(object):
 
     def key_pressed(self, key):
         self.logger.info('key pressed: [%s]' % key)
+        if key == ']':
+            self.target_index = (self.target_index + 10) % self.ref.num_frames
+            q = self.ref.pose_at(self.target_index, skel_id=0)
+            q = posetools.mirror_pose(self.skel, q)
+            self.skel.q = q
+        elif key == '[':
+            self.target_index = (self.target_index - 10) % self.ref.num_frames
+            self.skel.q = self.ref.pose_at(self.target_index, skel_id=0)
