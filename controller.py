@@ -13,17 +13,17 @@ class Controller:
         # Spring-damper
         ndofs = self.skel.ndofs
         self.qhat = self.skel.q
-        self.Kp = np.diagflat([0.0] * 6 + [400.0] * (ndofs - 6))
+        self.Kp = np.diagflat([0.0] * 6 + [800.0] * (ndofs - 6))
         self.Kd = np.diagflat([0.0] * 6 + [40.0] * (ndofs - 6))
 
         # Jacobian transpose
         self.jt = JTController(self.skel)
 
-    def update_target_by_frame(self, frame_idx):
-        if frame_idx < self.ref.num_frames:
-            self.qhat = self.ref.pose_at(frame_idx, skel_id=0)
-            I = self.skel.dof_indices(['j_heel_left_1', 'j_heel_right_1'])
-            self.qhat[I] += 0.2
+    # def update_target_by_frame(self, frame_idx):
+    #     if frame_idx < self.ref.num_frames:
+    #         self.qhat = self.ref.pose_at(frame_idx, skel_id=0)
+    #         I = self.skel.dof_indices(['j_heel_left_1', 'j_heel_right_1'])
+    #         self.qhat[I] += 0.2
 
     def compute(self):
         skel = self.skel
