@@ -3,7 +3,9 @@ import numpy as np
 import pydart
 from fileinfoworld import FileInfoWorld
 from mutable_motion import MutableMotion
+from motion_evaluator import MotionEvaluator
 from controller import Controller
+from motion_optimizer import MotionOptimizer
 import gltools
 import posetools
 
@@ -23,6 +25,10 @@ class Simulation(object):
 
         # Configure human
         self.skel = self.world.skels[0]
+        for i, body in enumerate(self.skel.bodies):
+            print i, body.name
+        for i, dof in enumerate(self.skel.dofs):
+            print i, dof.name
 
         # Configure stair: disable the movement of the first step
         self.world.skels[1].set_mobile(False)
@@ -34,9 +40,12 @@ class Simulation(object):
 
         # Contruct the mutable motion
         self.motion = MutableMotion(self.skel, self.ref)
-        x = self.motion.params()
-        x += (np.random.rand() - 0.5) * 0.1
-        self.motion.set_params(x)
+        # x = self.motion.params()
+        # x += (np.random.rand() - 0.5) * 1.0
+        # self.motion.set_params(x)
+
+        # Construct the motion evaluator
+        self.evaluator = MotionEvaluator(self.skel, self.motion)
 
         # Create the controller
         self.skel.controller = Controller(self.skel,
@@ -78,6 +87,7 @@ class Simulation(object):
     def render(self):
         gltools.render_COM(self.skel)
         self.world.render()
+        self.evaluator.render()
 
     def contacts(self):
         return self.world.contacts()
@@ -86,9 +96,16 @@ class Simulation(object):
         # self.logger.info('key pressed: [%s]' % key)
         if key == ']':
             self.target_index = (self.target_index + 10) % self.ref.num_frames
-            q = self.motion.pose_at(float(self.target_index) / 2000.0)
-            # q = posetools.mirror_pose(self.skel, q)
+            t = float(self.target_index) / 2000.0
+            q = self.motion.pose_at(t)
             self.skel.q = q
+            # self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
         elif key == '[':
             self.target_index = (self.target_index - 10) % self.ref.num_frames
-            self.skel.q = self.ref.pose_at(self.target_index, skel_id=0)
+            t = float(self.target_index) / 2000.0
+            q = self.motion.pose_at(t)
+            self.skel.q = q
+            # self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
+        elif key == 'O':
+            solver = MotionOptimizer(self.motion, self.evaluator)
+            solver.solve()
