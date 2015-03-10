@@ -50,7 +50,10 @@ class MutableMotion(object):
                   'j_thigh_right_z', 'j_shin_right', 'j_heel_right_1']
         for j in joints:
             self.add_basis(j, 0.0, 0.1, 0.05)
+            self.add_basis(j, 0.0, 0.1, 0.2)
+            self.add_basis(j, 0.0, 0.5, 0.3)
             self.add_basis(j, 0.0, 0.1, 0.5)
+            self.add_basis(j, 0.0, 0.1, 0.7)
             self.add_basis(j, 0.0, 0.1, 0.95)
 
     def add_basis(self, dof, w0=0.0, s0=0.1, x0=0.0):

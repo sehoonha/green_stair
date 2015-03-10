@@ -54,5 +54,6 @@ docs/_build/
 target/
 
 # capturs
+*.mp4
 captures
 cpatures/*

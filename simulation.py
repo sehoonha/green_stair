@@ -99,13 +99,13 @@ class Simulation(object):
             t = float(self.target_index) / 2000.0
             q = self.motion.pose_at(t)
             self.skel.q = q
-            # self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
+            self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
         elif key == '[':
             self.target_index = (self.target_index - 10) % self.ref.num_frames
             t = float(self.target_index) / 2000.0
             q = self.motion.pose_at(t)
             self.skel.q = q
-            # self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
+            self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
         elif key == 'O':
             solver = MotionOptimizer(self.motion, self.evaluator)
             solver.solve()

@@ -13,7 +13,7 @@ class Controller:
         # Spring-damper
         ndofs = self.skel.ndofs
         self.qhat = self.skel.q
-        self.Kp = np.diagflat([0.0] * 6 + [800.0] * (ndofs - 6))
+        self.Kp = np.diagflat([0.0] * 6 + [600.0] * (ndofs - 6))
         self.Kd = np.diagflat([0.0] * 6 + [40.0] * (ndofs - 6))
 
         # Jacobian transpose
