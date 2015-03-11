@@ -93,6 +93,10 @@ class MotionEvaluator(object):
         # Sort
         self.objs.sort(key=lambda x: x.time)
 
+        # Shit targets
+        for obj in self.objs:
+            obj.target[0] -= 0.07
+
     def add(self, time, name, local, target):
         body = self.skel.body(name)
         o = ObjPt(body, local, target)
@@ -115,7 +119,7 @@ class MotionEvaluator(object):
                 # print 'set_pose at', t
             ret += obj.cost()
             # print 'cost: ', obj.cost()
-        return ret
+        return ret / float(len(self.objs))
 
     def render(self):
         for obj in self.objs:

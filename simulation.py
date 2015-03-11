@@ -40,13 +40,13 @@ class Simulation(object):
 
         # Contruct the mutable motion
         self.motion = MutableMotion(self.skel, self.ref)
-        self.motion.save('test.json')
-        self.motion2 = MutableMotion(self.skel, self.ref)
-        self.motion2.load('test.json')
-        for t in np.arange(0.0, 0.1, 0.01):
-            print t
-            print self.motion.pose_at(t)
-            print self.motion2.pose_at(t)
+        # self.motion.save('test.json')
+        # self.motion2 = MutableMotion(self.skel, self.ref)
+        # self.motion2.load('test.json')
+        # for t in np.arange(0.0, 0.1, 0.01):
+        #     print t
+        #     print self.motion.pose_at(t)
+        #     print self.motion2.pose_at(t)
 
         # x = self.motion.params()
         # x += (np.random.rand() - 0.5) * 1.0

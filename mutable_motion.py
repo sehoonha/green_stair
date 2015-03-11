@@ -15,9 +15,10 @@ class RadialBasisDof(object):
             self.index = dof
 
         # Fetch the kernel parameters
-        self.w = w  # weight
-        self.s = s  # standard deviation
-        self.x = x  # center
+        # self.w = w  # weight
+        # self.s = s  # standard deviation
+        # self.x = x  # center
+        self.set_params([w, s, x])
 
     def num_params(self):
         return 3
@@ -26,7 +27,7 @@ class RadialBasisDof(object):
         return np.array([self.w, self.s, self.x])
 
     def set_params(self, params):
-        (self.w, self.s, self.x) = tuple(params)
+        (self.w, self.s, self.x) = tuple(np.array(params))
 
     def eval(self, t):
         vec = np.zeros(self.skel.ndofs)
