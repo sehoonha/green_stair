@@ -57,3 +57,6 @@ target/
 *.mp4
 captures
 cpatures/*
+
+# Data
+*.json

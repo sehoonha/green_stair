@@ -1,6 +1,7 @@
 import pydart
 import logging
 from simulation import Simulation
+import utils
 
 # Configure a logger
 logfmt = '[%(levelname)s][%(asctime)s][%(module)s:%(lineno)d] %(message)s'
@@ -12,6 +13,8 @@ logging.basicConfig(level=logging.DEBUG,
 logger = logging.getLogger(__name__)
 logger.info('Green stair project')
 
+# Register jsonpickle numpy handler
+utils.jsonpickle_numpy.register_handlers()
 
 sim = Simulation()
 

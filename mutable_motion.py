@@ -1,5 +1,9 @@
 import numpy as np
 import math
+import jsonpickle
+
+
+jsonpickle_default_skel = None
 
 
 class RadialBasisDof(object):
@@ -15,10 +19,6 @@ class RadialBasisDof(object):
         self.s = s  # standard deviation
         self.x = x  # center
 
-        # Store the pose vector
-        self.vec = np.zeros(skel.ndofs)
-        self.vec[self.index] = 1.0
-
     def num_params(self):
         return 3
 
@@ -29,9 +29,21 @@ class RadialBasisDof(object):
         (self.w, self.s, self.x) = tuple(params)
 
     def eval(self, t):
+        vec = np.zeros(self.skel.ndofs)
+        vec[self.index] = 1.0
+
         (w, s, x) = (self.w, self.s, self.x)
         value = w * math.exp(-(1.0) / (2.0 * s * s) * (t - x) * (t - x))
-        return value * self.vec
+        return value * vec
+
+    def __getstate__(self):
+        data = dict(self.__dict__)
+        del data['skel']
+        return data
+
+    def __setstate__(self, data):
+        self.__dict__.update(data)
+        self.skel = jsonpickle_default_skel
 
 
 class MutableMotion(object):
@@ -80,3 +92,25 @@ class MutableMotion(object):
         for b in self.basis:
             pose += b.eval(t)
         return pose
+
+    def __getstate__(self):
+        data = dict(self.__dict__)
+        del data['skel']
+        del data['ref']
+        return data
+
+    def __setstate__(self, data):
+        self.__dict__.update(data)
+
+    def save(self, filename):
+        with open(filename, 'w+') as fout:
+            frozen = jsonpickle.encode(self)
+            fout.write(frozen)
+
+    def load(self, filename):
+        global jsonpickle_default_skel
+        jsonpickle_default_skel = self.skel
+        with open(filename, 'r') as fin:
+            frozen = fin.read()
+            dup = jsonpickle.decode(frozen)
+            self.__dict__.update(dup.__dict__)
