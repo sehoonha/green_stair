@@ -16,6 +16,12 @@ class Controller:
         self.Kp = np.diagflat([0.0] * 6 + [600.0] * (ndofs - 6))
         self.Kd = np.diagflat([0.0] * 6 + [40.0] * (ndofs - 6))
 
+        # for i in range(self.skel.ndofs):
+        #     if 'right' in self.skel.dof(i).name:
+        #         self.Kp[i, i] *= 1.3
+        #         self.Kd[i, i] *= 1.1
+        # print self.Kp
+
         # Jacobian transpose
         self.jt = JTController(self.skel)
 
@@ -34,9 +40,17 @@ class Controller:
         qddot = invM.dot(-skel.c + p + d + skel.constraint_forces())
         tau = p + d - self.Kd.dot(qddot) * self.h
 
-        # frame = self.skel.world.frame
-        # if frame < 100:
-        #     tau += self.jt.apply('h_toe_right', [-1000, 1000, 0])
+        t = self.skel.world.t
+        if 0.15 < t and t < 0.30:
+            tau += self.jt.apply('h_heel_left', [0, 500, 0])
+            Cy = self.skel.C[1]
+            Cy_hat = 0.35
+            Cy_dot = self.skel.Cdot[1]
+            f = (Cy_hat - Cy) * 2000.0 - Cy_dot * 200.0
+            tau += self.jt.apply('h_toe_right', [0, -f, 0])
+
+        # if 0.3 < t and t < 0.40:
+        #     tau += self.jt.apply('h_thigh_left', [0, 1000, 0])
 
         # Make sure the first six are zero
         tau[:6] = 0

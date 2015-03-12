@@ -90,6 +90,12 @@ class MotionEvaluator(object):
         self.add(t, lh, [-0.03, -0.05, 0], [-0.01, -0.76, -0.11])
         self.add(t, lt, [0.13, -0.05, 0.0], [0.22, -0.95, -0.11])
 
+        # Do not collide toes with a stair
+        t = 0.15
+        self.add(t, lt, [0.13, -0.05, 0.0], [0.24, -0.79, -0.11])
+        t = 0.282
+        self.add(t, lt, [0.13, -0.05, 0.0], [0.52, -0.45, -0.11])
+
         # Sort
         self.objs.sort(key=lambda x: x.time)
 

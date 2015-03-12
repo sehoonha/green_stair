@@ -1,4 +1,5 @@
 import logging
+from PyQt4 import QtGui
 from pydart.qtgui import PyDartQtWindow
 from pydart.qtgui.trackball import Trackball
 
@@ -10,14 +11,17 @@ class Window(PyDartQtWindow):
 
     def initActions(self):
         PyDartQtWindow.initActions(self)
-        self.loadAction = self.createAction('Load', self.loadEvent)
-        self.saveAction = self.createAction('Save', self.saveEvent)
+        self.loadAction = self.createAction('&Load', self.loadEvent)
+        self.saveAction = self.createAction('&Save', self.saveEvent)
         self.printAction = self.createAction('Print', self.printEvent)
 
     def initToolbar(self):
+        self.timeText = QtGui.QLabel('Time: 0.0000', self)
+
         # Update self.toolbar_actions
         # "list[x:x] += list2" is Python idiom for add list to the another list
-        my_toolbar_actions = [self.printAction, None]
+
+        my_toolbar_actions = [self.printAction, self.timeText, None]
         self.toolbar_actions[4:4] += my_toolbar_actions
 
         # Call the parent function to initialize the toolbar
@@ -28,10 +32,15 @@ class Window(PyDartQtWindow):
         self.fileMenu.addAction(self.loadAction)
         self.fileMenu.addAction(self.saveAction)
 
+    def idleTimerEvent(self):
+        PyDartQtWindow.idleTimerEvent(self)
+        self.timeText.setText('T: %.4f' % self.sim.world.t)
+
     def loadEvent(self):
         filename = 'output.json'
         self.sim.motion.load(filename)
         self.logger.info('load file: ' + filename)
+        self.sim.reset()
 
     def saveEvent(self):
         filename = 'output.json'
