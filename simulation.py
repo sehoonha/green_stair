@@ -100,20 +100,20 @@ class Simulation(object):
     def contacts(self):
         return self.world.contacts()
 
+    def update_to_target(self):
+        t = float(self.target_index) / 2000.0
+        q = self.motion.pose_at(t)
+        self.skel.q = q
+        self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
+
     def key_pressed(self, key):
         # self.logger.info('key pressed: [%s]' % key)
         if key == ']':
             self.target_index = (self.target_index + 10) % self.ref.num_frames
-            t = float(self.target_index) / 2000.0
-            q = self.motion.pose_at(t)
-            self.skel.q = q
-            self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
+            self.update_to_target()
         elif key == '[':
             self.target_index = (self.target_index - 10) % self.ref.num_frames
-            t = float(self.target_index) / 2000.0
-            q = self.motion.pose_at(t)
-            self.skel.q = q
-            self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
+            self.update_to_target()
         elif key == 'O':
             solver = MotionOptimizer(self.motion, self.evaluator)
             solver.solve()
