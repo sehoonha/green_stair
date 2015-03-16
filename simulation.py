@@ -77,7 +77,9 @@ class Simulation(object):
         # init_pose[I] += 0.2
 
         self.skel.q = init_pose
-        self.skel.qdot = np.zeros(self.skel.ndofs)
+        # self.skel.qdot = np.zeros(self.skel.ndofs)
+        self.skel.qdot = self.motion.velocity_at_last()
+        print 'Cdot:', self.skel.Cdot
         self.world.reset()
         self.logger.info('reset OK')
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import pydart
 import logging
 from simulation import Simulation
