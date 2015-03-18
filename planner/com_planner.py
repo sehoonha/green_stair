@@ -16,7 +16,7 @@ class COMPlanner(object):
         self.m = self.skel.m
         self.h = 0.01
         self.T = 0.76
-        self.F = np.array([0.38 - 0.1, -0.73])  # 2D projected stance foot
+        self.F = np.array([0.38 - 0.05, -0.73])  # 2D projected stance foot
 
         # Extract from the first frame
         self.skel.q = ref.pose_at(0, self.skel.id)
@@ -48,18 +48,21 @@ class COMPlanner(object):
         X = tip.simulate(self.x0, self.h, self.T,
                          rhat_func=self.length_at_time)
         C = [np.array([x.x, x.y]) for x in X]
+        dC = [np.array([x.dx, x.dy]) for x in X]
         term0 = norm(C[0] - self.C0) ** 2
         term1 = norm(C[-1] - self.C1) ** 2
-        w_p = np.array([1.0, 1.0, 1.0, 1.0, 20.0, 20.0, 1.0])
+        w_p = np.array([1.0, 1.0, 1.0, 1.0, 10.0, 10.0, 1.0])
         term2 = norm((params - self.params0) * w_p) ** 2
-        cost = term0 + term1 + 0.01 * term2
+        term3 = norm(dC[0]) ** 2
+        cost = term0 + term1 + 0.01 * term2 + 0.01 * term3
         if verbose:
             logger = self.logger
             logger.info('---- COM planner ----')
             logger.info('cost: %.6f' % cost)
-            logger.info('term1= %.6f: %s %s' % (term0, C[0], self.C0))
-            logger.info('term2= %.6f: %s %s' % (term1, C[-1], self.C1))
-            logger.info('term3= %.6f: %s %s' % (term2, params, self.params0))
+            logger.info('term0= %.6f: %s %s' % (term0, C[0], self.C0))
+            logger.info('term1= %.6f: %s %s' % (term1, C[-1], self.C1))
+            logger.info('term2= %.6f: %s %s' % (term2, params, self.params0))
+            logger.info('term3= %.6f: %s' % (term3, dC[0]))
             logger.info('---------------------')
             # for x in X:
             #     logger.info('%.4f %.4f %s' % (x.x, x.y, str(x)))

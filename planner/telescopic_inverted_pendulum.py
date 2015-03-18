@@ -43,6 +43,7 @@ class TelescopicInvertedPendulum(object):
     def __init__(self, m):
         self.m = m
         self.g = 9.81
+        self.dt = 0.01
 
     def deriv(self, x, f):
         (th, r, dth, dr) = (x.th, x.r, x.dth, x.dr)
@@ -57,6 +58,7 @@ class TelescopicInvertedPendulum(object):
         X = list()
         x = x0
         X.append(x)
+        self.dt = dt
         for t in np.arange(0.0, T, dt):
             f = np.zeros(2)
             if control is not None:
@@ -70,11 +72,11 @@ class TelescopicInvertedPendulum(object):
 
     def control_length(self, x, t):
         th, r, dth, dr = x.th, x.r, x.dth, x.dr
-        m, h, g = 1.0, 0.01, 9.81
+        m, h, g = self.m, self.dt, self.g
         r_hat = self.rhat_func(t)
         dr_hat = (r_hat - r) / h
-        f_r = m / h * (dr_hat - dr) + m * (-r * dth * dth + g * cos(th))
-        # f_r = m / h * (dr_hat - dr)
+        ddr_hat = (dr_hat - dr) / h
+        f_r = m * ddr_hat + m * (-r * dth * dth + g * cos(th))
         # print 'force', f_r, 'r', r, r_hat, 'dr', dr, dr_hat
         return np.array([0.0, f_r])
 
