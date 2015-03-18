@@ -8,6 +8,7 @@ from controller import Controller
 from motion_optimizer import MotionOptimizer
 import gltools
 import posetools
+import planner
 
 
 class Simulation(object):
@@ -55,6 +56,10 @@ class Simulation(object):
         # Construct the motion evaluator
         self.evaluator = MotionEvaluator(self.skel, self.motion)
 
+        # A new planner
+        self.planner = planner.Planner(self.skel, self.ref)
+        self.planner.solve()
+
         # Create the controller
         self.skel.controller = Controller(self.skel,
                                           self.world.dt,
@@ -97,7 +102,8 @@ class Simulation(object):
     def render(self):
         gltools.render_COM(self.skel)
         self.world.render()
-        self.evaluator.render()
+        # self.evaluator.render()
+        self.planner.render()
 
     def contacts(self):
         return self.world.contacts()

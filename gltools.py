@@ -11,7 +11,7 @@ def render_COM(skel):
     glPopMatrix()
 
 
-def render_point(x, color, size):
+def render_point(x, color, size=0.05):
     glPushMatrix()
     glColor3d(*color)
     glTranslated(*x)
@@ -26,5 +26,16 @@ def render_line(x, y, color):
     glBegin(GL_LINES)
     glVertex3d(*x)
     glVertex3d(*y)
+    glEnd()
+    glPopMatrix()
+
+
+def render_trajectory(pts, color):
+    glPushMatrix()
+    glColor3d(*color)
+    glLineWidth(2.0)
+    glBegin(GL_LINES)
+    for pt in pts:
+        glVertex3d(*pt)
     glEnd()
     glPopMatrix()

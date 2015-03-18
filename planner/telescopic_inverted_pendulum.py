@@ -26,6 +26,16 @@ class TelescopicInvertedPendulum(object):
         def y(self):
             return self.r * cos(self.th)
 
+        @property
+        def dx(self):
+            th, r, dth, dr = self
+            return dr * sin(th) + r * cos(th) * dth
+
+        @property
+        def dy(self):
+            th, r, dth, dr = self
+            return dr * cos(th) - r * sin(th) * dth
+
         def __array_finalize__(self, obj):
             if obj is None:
                 return
@@ -65,7 +75,7 @@ class TelescopicInvertedPendulum(object):
         dr_hat = (r_hat - r) / h
         f_r = m / h * (dr_hat - dr) + m * (-r * dth * dth + g * cos(th))
         # f_r = m / h * (dr_hat - dr)
-        print 'force', f_r, 'r', r, r_hat, 'dr', dr, dr_hat
+        # print 'force', f_r, 'r', r, r_hat, 'dr', dr, dr_hat
         return np.array([0.0, f_r])
 
 if __name__ == '__main__':
