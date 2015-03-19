@@ -41,17 +41,6 @@ class Simulation(object):
 
         # Contruct the mutable motion
         self.motion = MutableMotion(self.skel, self.ref)
-        # self.motion.save('test.json')
-        # self.motion2 = MutableMotion(self.skel, self.ref)
-        # self.motion2.load('test.json')
-        # for t in np.arange(0.0, 0.1, 0.01):
-        #     print t
-        #     print self.motion.pose_at(t)
-        #     print self.motion2.pose_at(t)
-
-        # x = self.motion.params()
-        # x += (np.random.rand() - 0.5) * 1.0
-        # self.motion.set_params(x)
 
         # Construct the motion evaluator
         self.evaluator = MotionEvaluator(self.skel, self.motion)
@@ -73,18 +62,10 @@ class Simulation(object):
         logger.info('set the initial pose OK')
 
     def reset(self):
-        init_pose = self.motion.pose_at(0.0)
-        # init_pose = self.ref.pose_at(0, skel_id=0)
-        # init_pose[2] -= 0.25
-        # init_pose[3] += 0.19
-        # init_pose[4] += 0.07
-        # I = self.skel.dof_indices(['j_heel_left_1', 'j_heel_right_1'])
-        # init_pose[I] += 0.2
-
-        self.skel.q = init_pose
-        # self.skel.qdot = np.zeros(self.skel.ndofs)
-        self.skel.qdot = self.motion.velocity_at_last()
-        print 'Cdot:', self.skel.Cdot
+        # init_pose = self.motion.pose_at(0.0)
+        # self.skel.q = init_pose
+        # self.skel.qdot = self.motion.velocity_at_last()
+        self.skel.x = self.planner.init_pose.solution
         self.world.reset()
         self.logger.info('reset OK')
 

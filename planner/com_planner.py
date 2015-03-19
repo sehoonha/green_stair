@@ -30,7 +30,7 @@ class COMPlanner(object):
         r0 = norm(d)
         th0 = math.atan2(d[0], d[1])  # CW from y axis
         self.params0 = np.array([th0, r0, 0.0, 0.0, r0, r0, r0])
-        self.cost(self.params0, True)
+        # self.cost(self.params0, True)
 
     def num_params(self):
         return 7
@@ -66,8 +66,11 @@ class COMPlanner(object):
             logger.info('---------------------')
             # for x in X:
             #     logger.info('%.4f %.4f %s' % (x.x, x.y, str(x)))
-            self.optimalX = X
-            self.optimalC = C
+            self.solution = dict()
+            self.solution['X'] = X
+            self.solution['C'] = [c + self.F for c in C]
+            self.solution['dC'] = dC
+
         # print cost
         return cost
 
@@ -95,7 +98,7 @@ class COMPlanner(object):
         logger.info('OK')
 
     def render(self):
-        C3D = [np.concatenate((c + self.F, [0])) for c in self.optimalC]
+        C3D = [np.concatenate((c, [0])) for c in self.solution['C']]
         gltools.render_trajectory(C3D, [1.0, 0.0, 1.0])
         F3D = np.concatenate((self.F, [0]))
         gltools.render_point(F3D, [1.0, 0.0, 1.0])
