@@ -97,6 +97,11 @@ class COMPlanner(object):
         logger.info('finished to solve optimization')
         logger.info('OK')
 
+    def shift(self, x=0.0, y=0.0):
+        offset = np.array([x, y])
+        for c in self.solution['C']:
+            c += offset
+
     def render(self):
         C3D = [np.concatenate((c, [0])) for c in self.solution['C']]
         gltools.render_trajectory(C3D, [1.0, 0.0, 1.0])
