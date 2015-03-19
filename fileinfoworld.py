@@ -46,3 +46,6 @@ class FileInfoWorld(object):
 
     def pose_at(self, frame_index, skel_id):
         return np.array(self.pose[frame_index][skel_id])
+
+    def poses(self, skel_id):
+        return [np.array(frame[skel_id]) for frame in self.pose]

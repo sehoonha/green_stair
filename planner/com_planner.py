@@ -68,7 +68,7 @@ class COMPlanner(object):
             #     logger.info('%.4f %.4f %s' % (x.x, x.y, str(x)))
             self.optimalX = X
             self.optimalC = C
-        print cost
+        # print cost
         return cost
 
     def length_at_time(self, t):

@@ -1,4 +1,5 @@
 from com_planner import COMPlanner
+from foot_planner import FootPlanner
 
 
 class Planner(object):
@@ -10,5 +11,8 @@ class Planner(object):
         self.com = COMPlanner(self.skel, self.ref)
         self.com.solve()
 
+        self.foot = FootPlanner(self.skel, self.ref)
+
     def render(self):
         self.com.render()
+        self.foot.render()
