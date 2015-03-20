@@ -16,7 +16,8 @@ class FootPlanner(object):
             toe = self.skel.body('h_toe_left').to_world([0.13, -0.05, 0.0])
             self.toes.append(toe)
 
-        self.set_params([0.0, 0.1, 0.0, 0.1])
+        self.set_params([0.0, 0.05, 0.0, 0.05])
+        # self.set_params([0.0, 0.0, 0.0, 0.0])
 
     def num_params(self):
         return 4
@@ -50,6 +51,9 @@ class FootPlanner(object):
 
     def solve(self):
         self.bake()
+
+    def num_frames(self):
+        return len(self.toes)
 
     def shift(self, x=0, y=0, z=0):
         self.offset = np.array([x, y, z])

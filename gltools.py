@@ -34,7 +34,8 @@ def render_trajectory(pts, color):
     glPushMatrix()
     glColor3d(*color)
     glLineWidth(2.0)
-    glBegin(GL_LINES)
+    # glBegin(GL_LINES)
+    glBegin(GL_LINE_STRIP)
     for pt in pts:
         glVertex3d(*pt)
     glEnd()

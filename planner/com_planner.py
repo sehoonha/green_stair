@@ -14,8 +14,8 @@ class COMPlanner(object):
         self.ref = ref
 
         self.m = self.skel.m
-        self.h = 0.01
-        self.T = 0.76
+        self.h = 0.001
+        self.T = 0.734
         self.F = np.array([0.38 - 0.05, -0.73])  # 2D projected stance foot
 
         # Extract from the first frame
@@ -69,7 +69,11 @@ class COMPlanner(object):
             self.solution = dict()
             self.solution['X'] = X
             self.solution['C'] = [c + self.F for c in C]
+            C3D = [np.concatenate((c, [0])) for c in self.solution['C']]
+            self.solution['C3D'] = C3D
             self.solution['dC'] = dC
+            dC3D = [np.concatenate((d, [0])) for d in self.solution['dC']]
+            self.solution['dC3D'] = dC3D
 
         # print cost
         return cost
@@ -81,6 +85,9 @@ class COMPlanner(object):
         w2 = 3.0 * (1 - w) * w * w
         w3 = w * w * w
         return np.array([w0, w1, w2, w3]).dot(self.r_t)
+
+    def num_frames(self):
+        return len(self.solution['C'])
 
     def solve(self):
         self.counter = 0
@@ -103,7 +110,7 @@ class COMPlanner(object):
             c += offset
 
     def render(self):
-        C3D = [np.concatenate((c, [0])) for c in self.solution['C']]
+        C3D = self.solution['C3D']
         gltools.render_trajectory(C3D, [1.0, 0.0, 1.0])
         F3D = np.concatenate((self.F, [0]))
         gltools.render_point(F3D, [1.0, 0.0, 1.0])

@@ -42,9 +42,7 @@ class InitPoseSolver(object):
         return value
 
     def solve(self):
-        self.counter = 0
         logger = self.logger
-        # x0 = [10.0, 10.0]
         logger.info('x0 = %s' % self.x0)
         options = {'maxiter': 100000, 'ftol': 10e-10}
         logger.info('options = %s' % options)

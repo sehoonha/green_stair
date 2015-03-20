@@ -21,7 +21,8 @@ class Simulation(object):
 
         # Create world
         skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
-        self.world = pydart.create_world(1.0 / 2000.0, skel_filename)
+        # self.world = pydart.create_world(1.0 / 2000.0, skel_filename)
+        self.world = pydart.create_world(1.0 / 1000.0, skel_filename)
         logger.info('pydart create_world OK: dt = %f' % self.world.dt)
 
         # Configure human
@@ -71,7 +72,11 @@ class Simulation(object):
 
     def step(self):
         # self.skel.controller.update_target_by_frame(self.world.frame)
-        self.skel.controller.qhat = self.motion.pose_at(self.world.t)
+
+        index = int(self.world.t / 0.0008)
+        self.skel.controller.qhat = self.planner.pose_at(index)
+
+        # self.skel.controller.qhat = self.motion.pose_at(self.world.t)
         self.world.step()
 
     def num_frames(self):
@@ -91,7 +96,8 @@ class Simulation(object):
 
     def update_to_target(self):
         t = float(self.target_index) / 2000.0
-        q = self.motion.pose_at(t)
+        # q = self.motion.pose_at(t)
+        q = self.planner.pose_at(self.target_index)
         self.skel.q = q
         self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
 

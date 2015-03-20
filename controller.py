@@ -13,7 +13,8 @@ class Controller:
         # Spring-damper
         ndofs = self.skel.ndofs
         self.qhat = self.skel.q
-        self.Kp = np.diagflat([0.0] * 6 + [450.0] * (ndofs - 6))
+        # self.Kp = np.diagflat([0.0] * 6 + [450.0] * (ndofs - 6))
+        self.Kp = np.diagflat([0.0] * 6 + [800.0] * (ndofs - 6))
         self.Kd = np.diagflat([0.0] * 6 + [40.0] * (ndofs - 6))
 
         # for i in range(self.skel.ndofs):
@@ -40,18 +41,23 @@ class Controller:
         qddot = invM.dot(-skel.c + p + d + skel.constraint_forces())
         tau = p + d - self.Kd.dot(qddot) * self.h
 
-        t = self.skel.world.t
-        if 0.12 < t and t < 0.30:
-            # tau += self.jt.apply('h_heel_left', [0, 500, 0])
-            Cy = self.skel.C[1]
-            Cy_hat = 0.30
-            Cy_dot = self.skel.Cdot[1]
-            f = (Cy_hat - Cy) * 1000.0 - Cy_dot * 200.0
-            tau += self.jt.apply('h_toe_right', [0, -f, 0])
+        # t = self.skel.world.t
+        # if 0.12 < t and t < 0.30:
+        #     # tau += self.jt.apply('h_heel_left', [0, 500, 0])
+        #     Cy = self.skel.C[1]
+        #     Cy_hat = 0.30
+        #     Cy_dot = self.skel.Cdot[1]
+        #     f = (Cy_hat - Cy) * 1000.0 - Cy_dot * 200.0
+        #     tau += self.jt.apply('h_toe_right', [0, -f, 0])
 
-        if 0.3 < t and t < 0.40:
-            tau += self.jt.apply('h_shin_left', [0, 500, 0])
-            tau += self.jt.apply('h_heel_left', [0, 500, 0])
+        m = self.skel.m
+        g = 9.81
+        tau += self.jt.apply('h_heel_right', [0, -m * g, 0])
+        # tau += self.jt.apply('h_heel_left', [0, 5.0 * g, 0])
+
+        # if 0.3 < t and t < 0.40:
+        #     tau += self.jt.apply('h_shin_left', [0, 500, 0])
+        #     tau += self.jt.apply('h_heel_left', [0, 500, 0])
 
         # Make sure the first six are zero
         tau[:6] = 0
