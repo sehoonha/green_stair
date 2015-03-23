@@ -49,6 +49,7 @@ class InitPoseSolver(object):
         res = scipy.optimize.minimize(self.cost, self.x0,
                                       method='SLSQP',
                                       options=options)
+        self.solution_q0 = res.x[:self.skel.ndofs]
         self.solution = res.x
         logger.info('result = %s' % res)
         logger.info('cost = %.6f' % (self.cost(res.x, True)))

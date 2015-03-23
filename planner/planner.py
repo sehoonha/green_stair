@@ -17,7 +17,7 @@ class Planner(object):
 
         # 2. Build a swing foot trajectory
         self.foot = FootPlanner(self.skel, self.ref)
-        self.foot.set_params([0.0, 0.03, 0.0, 0.03])
+        self.foot.set_params([0.0, 0.10, 0.0, 0.10])
         self.foot.solve()
 
         print '# ref frames:', self.ref.num_frames
@@ -36,15 +36,15 @@ class Planner(object):
         C0 = self.com.solution['C3D'][0]
         dC0 = self.com.solution['dC3D'][0]
         LF0 = self.foot.toe_at_frame(0)
-        RF0 = [[0.27 + delta_x, -0.73, 0.09],
-               [0.51 + delta_x, -0.73, 0.09]]
+        RF0 = [[0.27 + delta_x, -0.74, 0.09],
+               [0.51 + delta_x, -0.74, 0.09]]
         self.init_pose = InitPoseSolver(self.skel, x0, C0, dC0, LF0, RF0[0])
         self.init_pose.solve()
 
         # 5. Solve the entire pose
         self.motion = MotionSolver(self.skel, self.ref,
                                    self.com, self.foot, RF0)
-        self.motion.solve()
+        self.motion.solve(self.init_pose.solution_q0)
 
     def render(self):
         self.com.render()

@@ -37,11 +37,11 @@ class MotionSolver(object):
         RFhat = self.rfoot
 
         v = []
-        v.append(norm(C - Chat) ** 2)
+        # v.append(norm(C - Chat) ** 2)
         v.append(norm(lf - LFhat) ** 2)
         v.append(norm(rf - RFhat[0]) ** 2)
         v.append(norm(rf2 - RFhat[1]) ** 2)
-        value = np.array(v).dot(np.array([2.0, 1.0, 1.0, 1.0]))
+        value = np.array(v).dot(np.array([1.0, 1.0, 1.0]))
         return value
 
     def solve_frame(self, index):
@@ -55,9 +55,11 @@ class MotionSolver(object):
         logger.info('Frame %d: %.6f' % (index, self.cost(res.x)))
         return res.x
 
-    def solve(self):
-        self.motions = []
+    def solve(self, q0):
+        self.motions = [q0]
         for i in range(0, self.nframes(), 10):
+            if i == 0:
+                continue
             q_i = self.solve_frame(i)
             self.motions.append(q_i)
 

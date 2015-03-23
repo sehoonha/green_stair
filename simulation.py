@@ -73,7 +73,7 @@ class Simulation(object):
     def step(self):
         # self.skel.controller.update_target_by_frame(self.world.frame)
 
-        index = int(self.world.t / 0.0008)
+        index = int(self.world.t / 0.0005)
         self.skel.controller.qhat = self.planner.pose_at(index)
 
         # self.skel.controller.qhat = self.motion.pose_at(self.world.t)
