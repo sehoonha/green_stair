@@ -15,6 +15,7 @@ class MotionSolver(object):
         self.rfoot = rfoot
 
         self.render_frame = 0
+        self.motions = []
 
     def nframes(self):
         return self.ref.num_frames
@@ -64,7 +65,10 @@ class MotionSolver(object):
             self.motions.append(q_i)
 
     def pose_at(self, frame_index):
-        index = min(frame_index / 10, len(self.motions) - 1)
+        index = frame_index / 10
+        if len(self.motions) == 0:
+            return self.ref.pose_at(frame_index, self.skel.id)
+        index = min(index, len(self.motions) - 1)
         return self.motions[index]
 
     def render(self):

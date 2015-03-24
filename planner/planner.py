@@ -44,7 +44,7 @@ class Planner(object):
         # 5. Solve the entire pose
         self.motion = MotionSolver(self.skel, self.ref,
                                    self.com, self.foot, RF0)
-        self.motion.solve(self.init_pose.solution_q0)
+        # self.motion.solve(self.init_pose.solution_q0)
 
     def render(self):
         self.com.render()

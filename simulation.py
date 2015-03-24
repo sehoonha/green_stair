@@ -7,7 +7,6 @@ from motion_evaluator import MotionEvaluator
 from controller import Controller
 from motion_optimizer import MotionOptimizer
 import gltools
-import posetools
 import planner
 
 
@@ -49,6 +48,7 @@ class Simulation(object):
         # A new planner
         self.planner = planner.Planner(self.skel, self.ref)
         self.planner.solve()
+        self.ref.append_mirrored_motion(self.skel)
 
         # Create the controller
         self.skel.controller = Controller(self.skel,

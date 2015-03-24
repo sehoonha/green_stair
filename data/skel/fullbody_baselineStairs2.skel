@@ -805,5 +805,57 @@
         <child>stair</child>
       </joint>
     </skeleton>
+    <skeleton name="stair3">
+      <mobile>false</mobile>
+      <body name="stair">
+        <transformation>0.97 -0.745 0 0 0 0</transformation>
+        <visualization_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.29 0.80 1.0</size>
+            </box>
+          </geometry>
+        </visualization_shape>
+        <collision_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.29 0.80 1.0</size>
+            </box>
+          </geometry>
+        </collision_shape>
+      </body>
+      <joint name="joint" type="free">
+        <parent>world</parent>
+        <child>stair</child>
+      </joint>
+    </skeleton>
+    <skeleton name="stair4">
+      <mobile>false</mobile>
+      <body name="stair">
+        <transformation>1.26 -0.645 0 0 0 0</transformation>
+        <visualization_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.29 1.00 1.0</size>
+            </box>
+          </geometry>
+        </visualization_shape>
+        <collision_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.29 1.00 1.0</size>
+            </box>
+          </geometry>
+        </collision_shape>
+      </body>
+      <joint name="joint" type="free">
+        <parent>world</parent>
+        <child>stair</child>
+      </joint>
+    </skeleton>
   </world>
 </skel>
