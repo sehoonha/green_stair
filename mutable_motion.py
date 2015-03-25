@@ -104,6 +104,8 @@ class MutableMotion(object):
             return self.velocity_at_first()
         elif frame_index == self.ref.num_frames - 1:
             return self.velocity_at_last()
+        elif frame_index > self.ref.num_frames - 1:
+            return np.zeros(self.skel.ndofs)
         h = self.h
         q0 = self.ref.pose_at(frame_index - 1, self.skel.id)
         q2 = self.ref.pose_at(frame_index + 1, self.skel.id)

@@ -73,11 +73,11 @@ class Simulation(object):
         # self.skel.q = q
 
         self.skel.q = self.ref.pose_at(0, self.skel.id)
-        # q = self.skel.q
-        # q['j_thigh_left_z'] += 0.15
-        # q['j_shin_left'] -= 0.33
-        # q['j_heel_left_1'] += 0.15
-        # self.skel.q = q
+        q = self.skel.q
+        q['j_thigh_left_z'] += 0.15
+        q['j_shin_left'] -= 0.33
+        q['j_heel_left_1'] += 0.15
+        self.skel.q = q
 
         # self.skel.qdot = np.zeros(self.skel.ndofs)
         self.skel.qdot = self.motion.velocity_at_first()
@@ -96,13 +96,19 @@ class Simulation(object):
         self.skel.controller.qhat = self.motion.ref_pose_at_frame(i)
         self.skel.controller.qdhat = self.motion.ref_velocity_at_frame(i)
 
-        # t = self.world.t
-        # if 0 <= t and t <= 0.5:
-        #     q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
-        #     q['j_thigh_left_z'] -= t
-        #     q['j_shin_left'] -= 0.33
-        #     q['j_heel_left_1'] += 0.15
-        #     self.skel.controller.qhat = q
+        t = self.world.t
+        if 0 <= t and t <= 0.5:
+            q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+            # q['j_thigh_left_z'] -= t
+            q['j_shin_left'] -= 0.33
+            q['j_heel_left_1'] -= 0.35
+            self.skel.controller.qhat = q
+        if 0.9 <= t and t <= 1.4:
+            q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+            # q['j_thigh_left_z'] -= t
+            q['j_shin_right'] -= (0.33 + 0.1)
+            q['j_heel_right_1'] -= (0.35 + 0.1)
+            self.skel.controller.qhat = q
 
         self.world.step()
 
@@ -117,11 +123,12 @@ class Simulation(object):
         self.world.render()
         self.render_target()
         # self.evaluator.render()
-        self.planner.render()
+        # self.planner.render()
 
     def render_target(self):
         x = self.skel.x
-        qhat = self.ref.pose_at(self.world.frame, self.skel.id)
+        frame = min(self.world.frame, self.ref.num_frames - 1)
+        qhat = self.ref.pose_at(frame, self.skel.id)
         self.skel.q = qhat
         self.skel.render_with_color(0.3, 0.3, 0.3, 0.5)
         self.skel.x = x
