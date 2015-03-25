@@ -102,12 +102,22 @@ class Simulation(object):
             # q['j_thigh_left_z'] -= t
             q['j_shin_left'] -= 0.33
             q['j_heel_left_1'] -= 0.35
+
+            # q['j_thigh_right_z'] += 0.15
+            # q['j_shin_right'] -= 0.15
+            # q['j_heel_right_1'] += 0.15
+            self.skel.controller.qhat = q
+        if 0.5 <= t and t <= 0.8:
+            q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+            q['j_shin_left'] += 0.1
+            # q['j_thigh_right_z'] += 0.2
+            # q['j_heel_right_1'] += 0.1
             self.skel.controller.qhat = q
         if 0.9 <= t and t <= 1.4:
             q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
             # q['j_thigh_left_z'] -= t
-            q['j_shin_right'] -= (0.33 + 0.1)
-            q['j_heel_right_1'] -= (0.35 + 0.1)
+            # q['j_shin_right'] -= (0.33 + 0.0)
+            # q['j_heel_right_1'] -= (0.35 + 0.0)
             self.skel.controller.qhat = q
 
         self.world.step()

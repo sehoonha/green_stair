@@ -42,7 +42,7 @@ class Controller:
         qddot = invM.dot(-skel.c + p + d + skel.constraint_forces())
         tau = p + d - self.Kd.dot(qddot) * self.h
 
-        # t = self.skel.world.t
+        t = self.skel.world.t
         # if 0.12 < t and t < 0.30:
         #     # tau += self.jt.apply('h_heel_left', [0, 500, 0])
         #     Cy = self.skel.C[1]
@@ -53,8 +53,10 @@ class Controller:
 
         m = self.skel.m
         g = 9.81
-        tau += self.jt.apply('h_heel_right', [0, -m * g, 0])
-        # tau += self.jt.apply('h_heel_left', [0, 5.0 * g, 0])
+        if t < 0.9:
+            tau += self.jt.apply('h_heel_right', [0, -m * g, 0])
+        else:
+            tau += self.jt.apply('h_heel_left', [0, -m * g, 0])
 
         # if 0.3 < t and t < 0.40:
         #     tau += self.jt.apply('h_shin_left', [0, 500, 0])
