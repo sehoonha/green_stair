@@ -53,7 +53,7 @@ class Controller:
 
         m = self.skel.m
         g = 9.81
-        if t < 0.9:
+        if t < 1.0:
             tau += self.jt.apply('h_heel_right', [0, -m * g, 0])
         else:
             tau += self.jt.apply('h_heel_left', [0, -m * g, 0])

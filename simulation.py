@@ -49,6 +49,7 @@ class Simulation(object):
         self.planner = planner.Planner(self.skel, self.ref)
         self.planner.solve()
         self.ref.append_mirrored_motion(self.skel)
+        self.ref.append_shifted_motion(self.skel)
 
         # Create the controller
         self.skel.controller = Controller(self.skel,
@@ -99,25 +100,34 @@ class Simulation(object):
         t = self.world.t
         if 0 <= t and t <= 0.5:
             q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
-            # q['j_thigh_left_z'] -= t
             q['j_shin_left'] -= 0.33
             q['j_heel_left_1'] -= 0.35
-
-            # q['j_thigh_right_z'] += 0.15
-            # q['j_shin_right'] -= 0.15
-            # q['j_heel_right_1'] += 0.15
             self.skel.controller.qhat = q
         if 0.5 <= t and t <= 0.8:
             q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
             q['j_shin_left'] += 0.1
-            # q['j_thigh_right_z'] += 0.2
-            # q['j_heel_right_1'] += 0.1
             self.skel.controller.qhat = q
-        if 0.9 <= t and t <= 1.4:
+        H = 1.0
+        if H <= t and t <= H + 0.5:
             q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
             # q['j_thigh_left_z'] -= t
-            # q['j_shin_right'] -= (0.33 + 0.0)
-            # q['j_heel_right_1'] -= (0.35 + 0.0)
+            q['j_shin_right'] -= (0.33 + 0.0)
+            q['j_heel_right_1'] -= (0.35 + 0.0)
+            self.skel.controller.qhat = q
+        if H + 0.5 <= t and t <= H + 0.7:
+            q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+            if t <= H + 0.6:
+                q['j_thigh_right_z'] += 0.4
+                q['j_heel_right_1'] += 0.3
+            q['j_shin_right'] += 0.1
+            self.skel.controller.qhat = q
+
+        # Lateral balance
+        if 0.8 <= t and t <= 1.0:
+            q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+            delta = -0.15
+            q['j_heel_left_2'] += delta
+            q['j_heel_right_2'] += delta
             self.skel.controller.qhat = q
 
         self.world.step()

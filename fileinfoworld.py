@@ -54,7 +54,7 @@ class FileInfoWorld(object):
                     q_j_mirrored[3] += 0.29
                     q_j_mirrored[4] += 0.2
                     if i == 0:
-                        self.append_interpolated_motion(q_j_mirrored, 115)
+                        self.append_interpolated_motion(q_j_mirrored, 215)
                     pose_frame.append(q_j_mirrored)
                 else:
                     pose_frame.append(q_j)
@@ -64,12 +64,29 @@ class FileInfoWorld(object):
     def append_interpolated_motion(self, rhs, num_frames):
         weights = np.linspace(0.0, 1.0, num_frames + 2)
         weights = weights[1:-1]
+        ref_frame = self.pose[-1]
         for w in weights:
             pose_frame = []
-            for j, q_j in enumerate(self.pose[-1]):
+            for j, q_j in enumerate(ref_frame):
                 if j == 0:
                     q_j_interp = (1 - w) * q_j + w * rhs
                     pose_frame.append(q_j_interp)
+                else:
+                    pose_frame.append(q_j)
+            self.pose.append(pose_frame)
+        self.num_frames = len(self.pose)
+
+    def append_shifted_motion(self, skel):
+        for i in range(self.num_frames):
+            pose_frame = []
+            for j, q_j in enumerate(self.pose[i]):
+                if j == 0:
+                    q_j_shifted = np.array(q_j)
+                    q_j_shifted[3] += 0.29 * 2
+                    q_j_shifted[4] += 0.2 * 2
+                    if i == 0:
+                        self.append_interpolated_motion(q_j_shifted, 215)
+                    pose_frame.append(q_j_shifted)
                 else:
                     pose_frame.append(q_j)
             self.pose.append(pose_frame)
