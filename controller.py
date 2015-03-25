@@ -13,8 +13,9 @@ class Controller:
         # Spring-damper
         ndofs = self.skel.ndofs
         self.qhat = self.skel.q
+        self.qdhat = np.zeros(ndofs)
         # self.Kp = np.diagflat([0.0] * 6 + [450.0] * (ndofs - 6))
-        self.Kp = np.diagflat([0.0] * 6 + [600.0] * (ndofs - 6))
+        self.Kp = np.diagflat([0.0] * 6 + [500.0] * (ndofs - 6))
         self.Kd = np.diagflat([0.0] * 6 + [40.0] * (ndofs - 6))
 
         # for i in range(self.skel.ndofs):
@@ -37,7 +38,7 @@ class Controller:
 
         invM = inv(skel.M + self.Kd * self.h)
         p = -self.Kp.dot(skel.q + skel.qdot * self.h - self.qhat)
-        d = -self.Kd.dot(skel.qdot)
+        d = -self.Kd.dot(skel.qdot - self.qdhat)
         qddot = invM.dot(-skel.c + p + d + skel.constraint_forces())
         tau = p + d - self.Kd.dot(qddot) * self.h
 

@@ -66,17 +66,44 @@ class Simulation(object):
         # init_pose = self.motion.pose_at(0.0)
         # self.skel.q = init_pose
         # self.skel.qdot = self.motion.velocity_at_last()
-        self.skel.x = self.planner.init_pose.solution
+
+        # self.skel.x = self.planner.init_pose.solution
+        # q = self.skel.q
+        # q['j_heel_right_1'] += 0.15
+        # self.skel.q = q
+
+        self.skel.q = self.ref.pose_at(0, self.skel.id)
+        # q = self.skel.q
+        # q['j_thigh_left_z'] += 0.15
+        # q['j_shin_left'] -= 0.33
+        # q['j_heel_left_1'] += 0.15
+        # self.skel.q = q
+
+        # self.skel.qdot = np.zeros(self.skel.ndofs)
+        self.skel.qdot = self.motion.velocity_at_first()
+
         self.world.reset()
         self.logger.info('reset OK')
 
     def step(self):
         # self.skel.controller.update_target_by_frame(self.world.frame)
 
-        index = int(self.world.t / 0.0005)
-        self.skel.controller.qhat = self.planner.pose_at(index)
+        # index = int(self.world.t / 0.0005)
+        # self.skel.controller.qhat = self.planner.pose_at(index)
 
         # self.skel.controller.qhat = self.motion.pose_at(self.world.t)
+        i = self.world.frame
+        self.skel.controller.qhat = self.motion.ref_pose_at_frame(i)
+        self.skel.controller.qdhat = self.motion.ref_velocity_at_frame(i)
+
+        # t = self.world.t
+        # if 0 <= t and t <= 0.5:
+        #     q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+        #     q['j_thigh_left_z'] -= t
+        #     q['j_shin_left'] -= 0.33
+        #     q['j_heel_left_1'] += 0.15
+        #     self.skel.controller.qhat = q
+
         self.world.step()
 
     def num_frames(self):
@@ -88,18 +115,29 @@ class Simulation(object):
     def render(self):
         gltools.render_COM(self.skel)
         self.world.render()
+        self.render_target()
         # self.evaluator.render()
         self.planner.render()
+
+    def render_target(self):
+        x = self.skel.x
+        qhat = self.ref.pose_at(self.world.frame, self.skel.id)
+        self.skel.q = qhat
+        self.skel.render_with_color(0.3, 0.3, 0.3, 0.5)
+        self.skel.x = x
 
     def contacts(self):
         return self.world.contacts()
 
     def update_to_target(self):
-        t = float(self.target_index) / 2000.0
-        # q = self.motion.pose_at(t)
-        q = self.planner.pose_at(self.target_index)
+        q = self.ref.pose_at(self.target_index, self.skel.id)
         self.skel.q = q
-        self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
+
+        # t = float(self.target_index) / 2000.0
+        # # q = self.motion.pose_at(t)
+        # q = self.planner.pose_at(self.target_index)
+        # self.skel.q = q
+        # self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
 
     def key_pressed(self, key):
         # self.logger.info('key pressed: [%s]' % key)

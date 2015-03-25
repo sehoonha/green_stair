@@ -94,6 +94,31 @@ class MutableMotion(object):
             pose += b.eval(t)
         return pose
 
+    def ref_pose_at_frame(self, frame_index):
+        frame_index = min(frame_index, self.ref.num_frames - 1)
+        pose = self.ref.pose_at(frame_index, self.skel.id)
+        return pose
+
+    def ref_velocity_at_frame(self, frame_index):
+        if frame_index == 0:
+            return self.velocity_at_first()
+        elif frame_index == self.ref.num_frames - 1:
+            return self.velocity_at_last()
+        h = self.h
+        q0 = self.ref.pose_at(frame_index - 1, self.skel.id)
+        q2 = self.ref.pose_at(frame_index + 1, self.skel.id)
+        vel = (-0.5 * q0 + 0.5 * q2) / h
+        return vel
+
+    def velocity_at_first(self):
+        """ Backward finite difference with 2 accuracy """
+        h = self.h
+        q0 = self.ref.pose_at(0, self.skel.id)
+        q1 = self.ref.pose_at(1, self.skel.id)
+        q2 = self.ref.pose_at(2, self.skel.id)
+        vel = (-1.5 * q0 + 2.0 * q1 - 0.5 * q2) / h
+        return vel
+
     def velocity_at_last(self):
         """ Backward finite difference with 2 accuracy """
         h = self.h
@@ -101,7 +126,6 @@ class MutableMotion(object):
         q1 = self.ref.pose_at(-2, self.skel.id)
         q2 = self.ref.pose_at(-1, self.skel.id)
         vel = (0.5 * q0 - 2.0 * q1 + 1.5 * q2) / h
-        print 'vel:', vel
         return vel
 
     def __getstate__(self):
