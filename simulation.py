@@ -46,8 +46,8 @@ class Simulation(object):
         self.evaluator = MotionEvaluator(self.skel, self.motion)
 
         # A new planner
-        self.planner = planner.Planner(self.skel, self.ref)
-        self.planner.solve()
+        # self.planner = planner.Planner(self.skel, self.ref)
+        # self.planner.solve()
         self.ref.append_mirrored_motion(self.skel)
         self.ref.append_shifted_motion(self.skel)
 
@@ -64,24 +64,15 @@ class Simulation(object):
         logger.info('set the initial pose OK')
 
     def reset(self):
-        # init_pose = self.motion.pose_at(0.0)
-        # self.skel.q = init_pose
-        # self.skel.qdot = self.motion.velocity_at_last()
-
-        # self.skel.x = self.planner.init_pose.solution
-        # q = self.skel.q
-        # q['j_heel_right_1'] += 0.15
-        # self.skel.q = q
-
         self.skel.q = self.ref.pose_at(0, self.skel.id)
         q = self.skel.q
+        # q[3] -= 0.01
         q['j_thigh_left_z'] += 0.15
         q['j_shin_left'] -= 0.33
         q['j_heel_left_1'] += 0.15
         self.skel.q = q
 
-        # self.skel.qdot = np.zeros(self.skel.ndofs)
-        self.skel.qdot = self.motion.velocity_at_first()
+        self.skel.qdot = 1.0 * self.motion.velocity_at_first()
 
         self.world.reset()
         self.logger.info('reset OK')
@@ -98,37 +89,81 @@ class Simulation(object):
         self.skel.controller.qdhat = self.motion.ref_velocity_at_frame(i)
 
         t = self.world.t
-        if 0 <= t and t <= 0.5:
-            q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
-            q['j_shin_left'] -= 0.33
-            q['j_heel_left_1'] -= 0.35
-            self.skel.controller.qhat = q
-        if 0.5 <= t and t <= 0.8:
-            q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
-            q['j_shin_left'] += 0.1
-            self.skel.controller.qhat = q
-        H = 1.0
-        if H <= t and t <= H + 0.5:
-            q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
-            # q['j_thigh_left_z'] -= t
-            q['j_shin_right'] -= (0.33 + 0.0)
-            q['j_heel_right_1'] -= (0.35 + 0.0)
-            self.skel.controller.qhat = q
-        if H + 0.5 <= t and t <= H + 0.7:
-            q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
-            if t <= H + 0.6:
-                q['j_thigh_right_z'] += 0.4
-                q['j_heel_right_1'] += 0.3
-            q['j_shin_right'] += 0.1
-            self.skel.controller.qhat = q
+        offset = []
+        offset.append((0.0, 0.05, 0.10, -0.11))
+        offset.append((0.1, 0.05, 0.10, -0.35))
+        offset.append((0.6, -0.2, 0.40, -0.3))
+        for i in range(3):
+            offset.append(offset[0])
 
-        # Lateral balance
-        if 0.8 <= t and t <= 1.0:
-            q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
-            delta = -0.15
-            q['j_heel_left_2'] += delta
-            q['j_heel_right_2'] += delta
-            self.skel.controller.qhat = q
+        for i, H in enumerate(np.arange(0.0, 5.0, 1.0)):
+            swing = 'left' if i % 2 == 0 else 'right'
+            stance = 'right' if i % 2 == 0 else 'left'
+            o = offset[i]
+            if H <= t and t <= H + 0.5:
+                q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+
+                q['j_shin_%s' % swing] -= 0.33
+                q['j_heel_%s_1' % swing] -= 0.35
+                self.skel.controller.qhat = q
+            if H + 0.5 <= t and t <= H + 0.7:
+                q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+                q['j_shin_%s' % swing] += 0.1
+                self.skel.controller.qhat = q
+
+            if H + 0.6 <= t and t <= H + 1.0:
+                q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+                q['j_thigh_left_z'] += o[3]
+                q['j_thigh_right_z'] += o[3]
+                self.skel.controller.qhat = q
+
+            if H + 0.4 <= t and t <= H + 1.0:
+                q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+                q['j_thigh_%s_z' % swing] += o[0]
+                q['j_shin_%s' % swing] += o[1]
+                q['j_heel_%s_1' % swing] += o[2]
+                q['j_heel_%s_1' % stance] += o[2]
+                self.skel.controller.qhat = q
+
+            # Lateral balance
+            if 0.8 <= t and t <= 1.0:
+                q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+                delta = -0.0
+                q['j_heel_%s_2' % stance] += delta
+                q['j_heel_%s_2' % swing] += delta
+                self.skel.controller.qhat = q
+
+        # if 0 <= t and t <= 0.5:
+        #     q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+        #     q['j_shin_left'] -= 0.33
+        #     q['j_heel_left_1'] -= 0.35
+        #     self.skel.controller.qhat = q
+        # if 0.5 <= t and t <= 0.8:
+        #     q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+        #     q['j_shin_left'] += 0.1
+        #     self.skel.controller.qhat = q
+        # H = 1.0
+        # if H <= t and t <= H + 0.5:
+        #     q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+        #     # q['j_thigh_left_z'] -= t
+        #     q['j_shin_right'] -= (0.33 + 0.0)
+        #     q['j_heel_right_1'] -= (0.35 + 0.0)
+        #     self.skel.controller.qhat = q
+        # if H + 0.5 <= t and t <= H + 0.7:
+        #     q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+        #     if t <= H + 0.6:
+        #         q['j_thigh_right_z'] += 0.4
+        #         q['j_heel_right_1'] += 0.3
+        #     q['j_shin_right'] += 0.1
+        #     self.skel.controller.qhat = q
+
+        # # Lateral balance
+        # if 0.8 <= t and t <= 1.0:
+        #     q = pydart.SkelVector(self.skel.controller.qhat, self.skel)
+        #     delta = -0.05
+        #     q['j_heel_left_2'] += delta
+        #     q['j_heel_right_2'] += delta
+        #     self.skel.controller.qhat = q
 
         self.world.step()
 
