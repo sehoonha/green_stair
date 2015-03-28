@@ -749,6 +749,9 @@
         </collision_shape>
       </body>
       <joint name="joint 1" type="prismatic">
+        <axis>
+          <xyz>0.0 1.0 0.0</xyz>
+        </axis>
         <parent>world</parent>
         <child>ground</child>
       </joint>

@@ -7,7 +7,6 @@ from motion_evaluator import MotionEvaluator
 from controller import Controller
 from motion_optimizer import MotionOptimizer
 import gltools
-import planner
 
 
 class Simulation(object):
@@ -31,8 +30,9 @@ class Simulation(object):
         for i, dof in enumerate(self.skel.dofs):
             print i, dof.name
 
-        # Configure stair: disable the movement of the first step
-        self.world.skels[1].set_mobile(False)
+        # # Configure stair: disable the movement of the first step
+        self.stair = self.world.skels[1]
+        # self.stair.set_mobile(False)
 
         # Load the reference motion
         self.ref = FileInfoWorld()
@@ -64,6 +64,7 @@ class Simulation(object):
         logger.info('set the initial pose OK')
 
     def reset(self):
+        self.stair.q = np.array([0.0])
         self.skel.q = self.ref.pose_at(0, self.skel.id)
         q = self.skel.q
         # q[3] -= 0.01
@@ -77,7 +78,21 @@ class Simulation(object):
         self.world.reset()
         self.logger.info('reset OK')
 
+    def step_stair(self):
+        if not self.stair.is_mobile():
+            return
+        pound_per_inch = 21
+        kg_per_meter = (pound_per_inch * 0.453) / 0.0254
+        K = kg_per_meter * 9.8
+        x = (self.stair.q[0] - 0.2)
+        xdot = self.stair.qdot[0]
+        if x < -0.2:
+            K *= 10
+        f = -K * x - 0.1 * (K ** 0.5) * xdot
+        self.stair.tau = np.array([f])
+
     def step(self):
+        self.step_stair()
         # self.skel.controller.update_target_by_frame(self.world.frame)
 
         # index = int(self.world.t / 0.0005)
