@@ -91,8 +91,8 @@ class Simulation(object):
         t = self.world.t
         offset = []
         offset.append((0.0, 0.05, 0.10, -0.11))
-        offset.append((0.1, 0.05, 0.10, -0.35))
-        offset.append((0.6, -0.2, 0.40, -0.3))
+        offset.append((0.1, 0.0, 0.10, -0.3))
+        offset.append((1.0, -0.2, 0.20, -0.3))
         for i in range(3):
             offset.append(offset[0])
 

@@ -52,6 +52,6 @@ class Window(PyDartQtWindow):
 
     def cam0Event(self):
         """ Change the default camera """
-        self.glwidget.tb = Trackball(phi=-1.5, theta=-10.6, zoom=1.0,
-                                     rot=[-0.09, 0.08, -0.01, 0.99],
-                                     trans=[-0.47, -0.04, -3.01])
+        self.glwidget.tb = Trackball(phi=-2.1, theta=-6.6, zoom=1.0,
+                                     rot=[-0.06, 0.01, -0.02, 1.00],
+                                     trans=[-0.73, -0.19, -3.47])

@@ -15,7 +15,7 @@ class Controller:
         self.qhat = self.skel.q
         self.qdhat = np.zeros(ndofs)
         # self.Kp = np.diagflat([0.0] * 6 + [450.0] * (ndofs - 6))
-        self.Kp = np.diagflat([0.0] * 6 + [500.0] * (ndofs - 6))
+        self.Kp = np.diagflat([0.0] * 6 + [520.0] * (ndofs - 6))
         self.Kd = np.diagflat([0.0] * 6 + [40.0] * (ndofs - 6))
 
         # for i in range(self.skel.ndofs):
