@@ -727,23 +727,24 @@
         <init_vel>0</init_vel>
       </joint>
     </skeleton>
-    <skeleton name="ground">
-      <mobile>false</mobile>
-      <body name="ground">
+    <skeleton name="step0">
+      <mobile>true</mobile>
+      <body name="step0">
         <transformation>0.1 -1.045 0 0 0 0</transformation>
         <visualization_shape>
           <transformation>0 0 0 0 0 0</transformation>
           <geometry>
             <box>
-              <size>0.29 0.20 1.0</size>
+              <size>0.28 0.19 1.0</size>
             </box>
           </geometry>
+          <color>0.0 1.0 0.0</color>
         </visualization_shape>
         <collision_shape>
           <transformation>0 0 0 0 0 0</transformation>
           <geometry>
             <box>
-              <size>0.29 0.20 1.0</size>
+              <size>0.28 0.19 1.0</size>
             </box>
           </geometry>
         </collision_shape>
@@ -753,18 +754,18 @@
           <xyz>0.0 1.0 0.0</xyz>
         </axis>
         <parent>world</parent>
-        <child>ground</child>
+        <child>step0</child>
       </joint>
     </skeleton>
     <skeleton name="stair1">
       <mobile>false</mobile>
       <body name="stair">
-        <transformation>0.39 -0.945 0 0 0 0</transformation>
+        <transformation>0.39 -1.045 0 0 0 0</transformation>
         <visualization_shape>
           <transformation>0 0 0 0 0 0</transformation>
           <geometry>
             <box>
-              <size>0.29 0.4 1.0</size>
+              <size>0.29 0.2 1.0</size>
             </box>
           </geometry>
         </visualization_shape>
@@ -772,7 +773,7 @@
           <transformation>0 0 0 0 0 0</transformation>
           <geometry>
             <box>
-              <size>0.29 0.4 1.0</size>
+              <size>0.29 0.2 1.0</size>
             </box>
           </geometry>
         </collision_shape>
@@ -782,15 +783,45 @@
         <child>stair</child>
       </joint>
     </skeleton>
-    <skeleton name="stair2">
-      <mobile>false</mobile>
-      <body name="stair">
-        <transformation>0.68 -0.845 0 0 0 0</transformation>
+    <skeleton name="step1">
+      <!-- <mobile>false</mobile> -->
+      <body name="step1">
+        <transformation>0.39 -0.845 0 0 0 0</transformation>
         <visualization_shape>
           <transformation>0 0 0 0 0 0</transformation>
           <geometry>
             <box>
-              <size>0.29 0.60 1.0</size>
+              <size>0.28 0.19 1.0</size>
+            </box>
+          </geometry>
+          <color>0.0 1.0 0.0</color>
+        </visualization_shape>
+        <collision_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.28 0.19 1.0</size>
+            </box>
+          </geometry>
+        </collision_shape>
+      </body>
+      <joint name="joint" type="prismatic">
+        <axis>
+          <xyz>0.0 1.0 0.0</xyz>
+        </axis>
+        <parent>world</parent>
+        <child>step1</child>
+      </joint>
+    </skeleton>
+    <skeleton name="stair2">
+      <mobile>false</mobile>
+      <body name="stair">
+        <transformation>0.68 -0.945 0 0 0 0</transformation>
+        <visualization_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.29 0.40 1.0</size>
             </box>
           </geometry>
         </visualization_shape>
@@ -798,7 +829,7 @@
           <transformation>0 0 0 0 0 0</transformation>
           <geometry>
             <box>
-              <size>0.29 0.60 1.0</size>
+              <size>0.29 0.40 1.0</size>
             </box>
           </geometry>
         </collision_shape>
@@ -806,6 +837,35 @@
       <joint name="joint" type="free">
         <parent>world</parent>
         <child>stair</child>
+      </joint>
+    </skeleton>
+    <skeleton name="step2">
+      <body name="step2">
+        <transformation>0.68 -0.645 0 0 0 0</transformation>
+        <visualization_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.28 0.19 1.0</size>
+            </box>
+          </geometry>
+          <color>0.0 1.0 0.0</color>
+        </visualization_shape>
+        <collision_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.28 0.19 1.0</size>
+            </box>
+          </geometry>
+        </collision_shape>
+      </body>
+      <joint name="joint" type="prismatic">
+        <axis>
+          <xyz>0.0 1.0 0.0</xyz>
+        </axis>
+        <parent>world</parent>
+        <child>step2</child>
       </joint>
     </skeleton>
     <skeleton name="stair3">
