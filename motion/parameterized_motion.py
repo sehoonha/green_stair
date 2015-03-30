@@ -9,6 +9,18 @@ class ParameterizedMotion(object):
         # Init internal variables
         self.h = self.skel.world.dt
 
+        # Bake the reference COM
+        self.bake_ref_com()
+
+    def bake_ref_com(self):
+        self.ref_com = []
+        x = self.skel.x
+        for i in range(self.ref.num_frames):
+            q = self.ref_pose_at_frame(i)
+            self.skel.q = q
+            self.ref_com.append(self.skel.C)
+        self.skel.x = x
+
     def num_params(self):
         pass
 
@@ -29,8 +41,14 @@ class ParameterizedMotion(object):
             return self.parameterized_pose_at_frame(frame_index)
 
     def ref_pose_at_frame(self, frame_index):
+        frame_index = min(frame_index, self.ref.num_frames - 1)
+
         q = self.ref.pose_at(frame_index, self.skel.id)
         return SkelVector(q, self.skel)
+
+    def ref_com_at_frame(self, frame_index):
+        frame_index = min(frame_index, self.ref.num_frames - 1)
+        return self.ref_com[frame_index]
 
     def velocity_at_frame(self, frame_index, isRef=False):
         if frame_index == 0:

@@ -7,7 +7,7 @@ from controller import Controller
 from motion_optimizer import MotionOptimizer
 import gltools
 from spring_stair import SpringStair
-from motion import StepOffsetMotion
+from motion import StepOffsetMotion, Optimizer
 
 
 class Simulation(object):
@@ -19,8 +19,8 @@ class Simulation(object):
         logger.info('pydart initialization OK')
 
         # Create world
-        # skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
-        skel_filename = 'data/skel/fullbody_springStair.skel'
+        skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
+        # skel_filename = 'data/skel/fullbody_springStair.skel'
         self.world = pydart.create_world(1.0 / 1000.0, skel_filename)
         logger.info('pydart create_world OK: dt = %f' % self.world.dt)
 
@@ -72,7 +72,7 @@ class Simulation(object):
 
         self.world.reset()
         self.world.reset()
-        self.logger.info('reset OK')
+        # self.logger.info('reset OK')
 
     def step(self):
         self.stair.apply_force()
@@ -127,5 +127,9 @@ class Simulation(object):
             self.target_index = (self.target_index - 10) % self.ref.num_frames
             self.update_to_target()
         elif key == 'O':
-            solver = MotionOptimizer(self.motion, self.evaluator)
-            solver.solve()
+            # solver = MotionOptimizer(self.motion, self.evaluator)
+            self.solver = Optimizer(self, self.motion)
+            # solver.solve()
+            self.solver.launch()
+        elif key == 'K':
+            self.solver.to_be_killed = True
