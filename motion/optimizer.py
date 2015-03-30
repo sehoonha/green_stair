@@ -31,7 +31,7 @@ class Optimizer(object):
         skel = self.sim.skel
         world = self.sim.world
 
-        MAX_TIME = 3.0
+        MAX_TIME = 3.5
         self.motion.set_params(_x)
         self.sim.reset()
         v = 0.0
@@ -48,15 +48,22 @@ class Optimizer(object):
                 if math.fabs(skel.C[i] - Chat[i]) > MaxDeltaC[i]:
                     balanced = False
 
-        v = v + 1000.0 * (MAX_TIME - world.t)
+        # Range check (0.05 --> 5000.0?)
+        bound_penalty = 0.0
+        if _x[-1] < 0.0:
+            bound_penalty += (0.0 - _x[-1]) ** 2
+        if _x[-1] > 0.2:
+            bound_penalty += (_x[-1] - 0.2) ** 2
+
+        v = v + 5000.0 * (MAX_TIME - world.t) + 10e6 * bound_penalty
         self.logger.info('%.6f (%.4f) <-- %s' % (v, world.t, repr(list(_x))))
         return v
 
     def solve(self):
         opts = cma.CMAOptions()
         opts.set('verb_disp', 1)
-        opts.set('ftarget', 0.1)
-        opts.set('popsize', 32)
+        opts.set('ftarget', 10.0)
+        opts.set('popsize', 16)
         opts.set('maxiter', 1000)
 
         dim = self.motion.num_params()

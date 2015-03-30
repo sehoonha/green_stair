@@ -47,7 +47,11 @@ class SpringStair(object):
             activation = params['activation']
             if not skel.is_mobile() and activation < t:
                 skel.set_mobile(True)
-                self.logger.info('Activate %s at %f' % (params['name'], t))
+                # self.logger.info('Activate %s at %f' % (params['name'], t))
+
+    def set_activation(self, dt):
+        for i, params in enumerate(self.stairs):
+            params['activation'] = float(i) + dt
 
     def apply_force(self):
         self.activate()
@@ -63,5 +67,5 @@ class SpringStair(object):
             xdot = skel.qdot[0]
             if x < -0.2:
                 K *= 10
-            f = -K * x - 0.1 * (K ** 0.5) * xdot
+            f = -K * x - 0.5 * (K ** 0.5) * xdot
             skel.tau = np.array([f])

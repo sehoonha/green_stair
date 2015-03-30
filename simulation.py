@@ -8,6 +8,7 @@ from motion_optimizer import MotionOptimizer
 import gltools
 from spring_stair import SpringStair
 from motion import StepOffsetMotion, Optimizer
+from guppy import hpy
 
 
 class Simulation(object):
@@ -19,8 +20,8 @@ class Simulation(object):
         logger.info('pydart initialization OK')
 
         # Create world
-        skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
-        # skel_filename = 'data/skel/fullbody_springStair.skel'
+        # skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
+        skel_filename = 'data/skel/fullbody_springStair.skel'
         self.world = pydart.create_world(1.0 / 1000.0, skel_filename)
         logger.info('pydart create_world OK: dt = %f' % self.world.dt)
 
@@ -56,10 +57,13 @@ class Simulation(object):
         self.target_index = 0
 
         # Reset the scene
+        self.reset_counter = 0
         self.reset()
         logger.info('set the initial pose OK')
 
     def reset(self):
+        print self.motion.params
+        self.stair.set_activation(self.motion.params[-1])
         self.stair.reset()
         self.skel.q = self.motion.pose_at_frame(0, isRef=True)
         q = self.skel.q
@@ -73,6 +77,11 @@ class Simulation(object):
         self.world.reset()
         self.world.reset()
         # self.logger.info('reset OK')
+
+        # if self.reset_counter % 100 == 0:
+        #     h = hpy()
+        #     print h.heap()
+        # self.reset_counter += 1
 
     def step(self):
         self.stair.apply_force()

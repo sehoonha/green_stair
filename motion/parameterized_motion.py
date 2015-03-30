@@ -27,9 +27,6 @@ class ParameterizedMotion(object):
     def set_params(self, params):
         self.params = params
 
-    def params(self):
-        return self.params
-
     def parameterized_pose_at_frame(self, frame_index):
         """Should be inherited"""
         pass
