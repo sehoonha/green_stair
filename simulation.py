@@ -47,6 +47,7 @@ class Simulation(object):
 
         # Contruct the mutable motion
         self.motion = StepOffsetMotion(self.skel, self.ref)
+        self.motion.set_stair_info(self.stair)
 
         # Create the controller
         self.skel.controller = Controller(self.skel,

@@ -10,5 +10,10 @@ def mirror_pose(skel, q):
             j = skel.dof_index(dof.name.replace('right', 'left'))
         else:
             j = i
-        ret[i] = q[j]
+        scale = 1.0
+        if i > 6 and ('_x' in dof.name or '_y' in dof.name):
+            scale = -1.0
+        # print j, '<--', i, '(', scale, ')'
+        ret[i] = scale * q[j]
+    # exit(0)
     return ret

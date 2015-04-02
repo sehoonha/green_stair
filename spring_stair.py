@@ -6,6 +6,7 @@ class SpringStair(object):
     def __init__(self, world):
         self.logger = logging.getLogger(__name__)
         self.world = world
+        self.step_duration = 0.8
 
         # Default stiffness
         pound_per_inch = 21
@@ -22,7 +23,7 @@ class SpringStair(object):
             params['skel'] = skel
             params['init_height'] = skel.q[0]
             params['rest_height'] = skel.q[0] + 0.2
-            params['activation'] = float(len(self.stairs))
+            params['activation'] = float(len(self.stairs)) * self.step_duration
             params['K'] = K
             self.stairs.append(params)
             # Debug output
@@ -51,7 +52,8 @@ class SpringStair(object):
 
     def set_activation(self, dt):
         for i, params in enumerate(self.stairs):
-            params['activation'] = float(i) + dt
+            T = self.step_duration
+            params['activation'] = float(i) * T + dt
 
     def apply_force(self):
         self.activate()

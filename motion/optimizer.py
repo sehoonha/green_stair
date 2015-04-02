@@ -20,6 +20,7 @@ class Optimizer(object):
     def launch(self):
         self.logger.info('launch the solver as the thread')
         self.thread = threading.Thread(target=optimizer_worker, args=(self,))
+
         self.logger.info('thread initialized')
         self.thread.start()
         self.logger.info('thread started')
@@ -31,18 +32,25 @@ class Optimizer(object):
         skel = self.sim.skel
         world = self.sim.world
 
-        MAX_TIME = 2.8
+        MAX_TIME = 3.0 * self.sim.stair.step_duration
         self.motion.set_params(_x)
         self.sim.reset()
         v = 0.0
         balanced = True
         while world.t < MAX_TIME and balanced:
             self.sim.step()
-            # Fast check of balance
+            # COM deviation
             Chat = self.motion.ref_com_at_frame(world.frame)
             dist = 0.5 * norm(skel.C - Chat) ** 2
             v += dist
 
+            # Head deviation
+            H = skel.body('h_head').C
+            Hhat = self.motion.ref_head_at_frame(world.frame)
+            dist = 0.5 * norm(H - Hhat) ** 2
+            v += dist
+
+            # Check falling
             MaxDeltaC = np.array([0.4, 0.4, 0.2])
             for i in range(3):
                 if math.fabs(skel.C[i] - Chat[i]) > MaxDeltaC[i]:
@@ -51,10 +59,11 @@ class Optimizer(object):
         # Give more penalty to the final frame
         final_frame_index = int(MAX_TIME / world.dt)
         Chat_T = self.motion.ref_com_at_frame(final_frame_index)
-        v += 500.0 * norm(skel.C - Chat_T) ** 2
+        v += 1000.0 * norm(skel.C - Chat_T) ** 2
 
-        # Final COMdot
-        v += 500.0 * norm(skel.Cdot) ** 2
+        # # Final COMdot
+        # Cdothat_T = self.motion.ref_com_dot_at_frame(final_frame_index)
+        # v += 1000.0 * norm(skel.Cdot - Cdothat_T) ** 2
 
         # Range check (0.05 --> 5000.0?)
         bound_penalty = 0.0
@@ -63,7 +72,7 @@ class Optimizer(object):
         if _x[-1] > 0.2:
             bound_penalty += (_x[-1] - 0.2) ** 2
 
-        v = v + 5000.0 * (MAX_TIME - world.t) + 10e6 * bound_penalty
+        v = 10.0 * v + 5000.0 * (MAX_TIME - world.t) + 10e6 * bound_penalty
         self.logger.info('%.6f (%.4f) <-- %s' % (v, world.t, repr(list(_x))))
         return v
 

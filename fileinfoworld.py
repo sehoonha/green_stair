@@ -52,9 +52,10 @@ class FileInfoWorld(object):
                 if j == 0:
                     q_j_mirrored = posetools.mirror_pose(skel, q_j)
                     q_j_mirrored[3] += 0.29
-                    q_j_mirrored[4] += 0.2
+                    q_j_mirrored[4] += 0.20
                     if i == 0:
-                        self.append_interpolated_motion(q_j_mirrored, 215)
+                        # self.append_interpolated_motion(q_j_mirrored, 215)
+                        self.append_interpolated_motion(q_j_mirrored, 65)
                     pose_frame.append(q_j_mirrored)
                 else:
                     pose_frame.append(q_j)
@@ -85,7 +86,7 @@ class FileInfoWorld(object):
                     q_j_shifted[3] += 0.29 * 2
                     q_j_shifted[4] += 0.2 * 2
                     if i == 0:
-                        self.append_interpolated_motion(q_j_shifted, 215)
+                        self.append_interpolated_motion(q_j_shifted, 65)
                     pose_frame.append(q_j_shifted)
                 else:
                     pose_frame.append(q_j)

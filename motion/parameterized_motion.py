@@ -14,11 +14,17 @@ class ParameterizedMotion(object):
 
     def bake_ref_com(self):
         self.ref_com = []
+        self.ref_com_dot = []
+        self.ref_head = []
         x = self.skel.x
         for i in range(self.ref.num_frames):
-            q = self.ref_pose_at_frame(i)
+            q = self.pose_at_frame(i, isRef=True)
+            qdot = self.velocity_at_frame(i, isRef=True)
             self.skel.q = q
+            self.skel.qdot = qdot
             self.ref_com.append(self.skel.C)
+            self.ref_com_dot.append(self.skel.Cdot)
+            self.ref_head.append(self.skel.body('h_head').C)
         self.skel.x = x
 
     def num_params(self):
@@ -46,6 +52,14 @@ class ParameterizedMotion(object):
     def ref_com_at_frame(self, frame_index):
         frame_index = min(frame_index, self.ref.num_frames - 1)
         return self.ref_com[frame_index]
+
+    def ref_com_dot_at_frame(self, frame_index):
+        frame_index = min(frame_index, self.ref.num_frames - 1)
+        return self.ref_com_dot[frame_index]
+
+    def ref_head_at_frame(self, frame_index):
+        frame_index = min(frame_index, self.ref.num_frames - 1)
+        return self.ref_head[frame_index]
 
     def velocity_at_frame(self, frame_index, isRef=False):
         if frame_index == 0:
