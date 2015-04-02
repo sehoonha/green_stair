@@ -43,6 +43,7 @@ class Simulation(object):
         logger.info('load reference motions OK: # %d' % self.ref.num_frames)
         self.ref.append_mirrored_motion(self.skel)
         self.ref.append_shifted_motion(self.skel)
+        self.ref.add_offset()
         logger.info('modify reference motions OK: # %d' % self.ref.num_frames)
 
         # Contruct the mutable motion
@@ -68,10 +69,10 @@ class Simulation(object):
         self.stair.reset()
         self.skel.q = self.motion.pose_at_frame(0, isRef=True)
         q = self.skel.q
-        # q[3] -= 0.01
-        q['j_thigh_left_z'] += 0.15
-        q['j_shin_left'] -= 0.33
-        q['j_heel_left_1'] += 0.15
+        # # q[3] -= 0.01
+        # q['j_thigh_left_z'] += 0.15
+        # q['j_shin_left'] -= 0.33
+        # q['j_heel_left_1'] += 0.15
         self.skel.q = q
         self.skel.qdot = 1.0 * self.motion.velocity_at_frame(0, isRef=True)
 
@@ -108,8 +109,11 @@ class Simulation(object):
         # self.planner.render()
 
     def render_target(self):
-        x = self.skel.x
         frame = min(self.world.frame, self.ref.num_frames - 1)
+        self.render_target_at_frame(frame)
+
+    def render_target_at_frame(self, frame):
+        x = self.skel.x
         qhat = self.ref.pose_at(frame, self.skel.id)
         self.skel.q = qhat
         self.skel.render_with_color(0.3, 0.3, 0.3, 0.5)
@@ -131,9 +135,11 @@ class Simulation(object):
     def key_pressed(self, key):
         # self.logger.info('key pressed: [%s]' % key)
         if key == ']':
+            print self.target_index
             self.target_index = (self.target_index + 10) % self.ref.num_frames
             self.update_to_target()
         elif key == '[':
+            print self.target_index
             self.target_index = (self.target_index - 10) % self.ref.num_frames
             self.update_to_target()
         elif key == 'O':

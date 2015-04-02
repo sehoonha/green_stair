@@ -93,6 +93,15 @@ class FileInfoWorld(object):
             self.pose.append(pose_frame)
         self.num_frames = len(self.pose)
 
+    def add_offset(self):
+        for i in range(self.num_frames):
+            for j, q_j in enumerate(self.pose[i]):
+                if j != 0:
+                    continue
+                q_j[2] -= 5.0 * (3.1415 / 180.0)
+                q_j[3] += 0.04
+                q_j[4] += 0.03
+
     def pose_at(self, frame_index, skel_id):
         return np.array(self.pose[frame_index][skel_id])
 
