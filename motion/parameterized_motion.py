@@ -16,6 +16,8 @@ class ParameterizedMotion(object):
         self.ref_com = []
         self.ref_com_dot = []
         self.ref_head = []
+        self.ref_lfoot = []
+        self.ref_rfoot = []
         x = self.skel.x
         for i in range(self.ref.num_frames):
             q = self.pose_at_frame(i, isRef=True)
@@ -25,6 +27,8 @@ class ParameterizedMotion(object):
             self.ref_com.append(self.skel.C)
             self.ref_com_dot.append(self.skel.Cdot)
             self.ref_head.append(self.skel.body('h_head').C)
+            self.ref_lfoot.append(self.skel.body('h_toe_left').C)
+            self.ref_rfoot.append(self.skel.body('h_toe_right').C)
         self.skel.x = x
 
     def num_params(self):
@@ -60,6 +64,14 @@ class ParameterizedMotion(object):
     def ref_head_at_frame(self, frame_index):
         frame_index = min(frame_index, self.ref.num_frames - 1)
         return self.ref_head[frame_index]
+
+    def ref_lfoot_at_frame(self, frame_index):
+        frame_index = min(frame_index, self.ref.num_frames - 1)
+        return self.ref_lfoot[frame_index]
+
+    def ref_rfoot_at_frame(self, frame_index):
+        frame_index = min(frame_index, self.ref.num_frames - 1)
+        return self.ref_rfoot[frame_index]
 
     def velocity_at_frame(self, frame_index, isRef=False):
         if frame_index == 0:

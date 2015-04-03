@@ -2,13 +2,11 @@ import logging
 import numpy as np
 import pydart
 from fileinfoworld import FileInfoWorld
-# from mutable_motion import MutableMotion
 from controller import Controller
-from motion_optimizer import MotionOptimizer
 import gltools
 from spring_stair import SpringStair
-from motion import StepOffsetMotion, Optimizer
-from guppy import hpy
+from motion import StepOffsetMotion, RadialBasisMotion, Optimizer
+# from guppy import hpy
 
 
 class Simulation(object):
@@ -20,8 +18,8 @@ class Simulation(object):
         logger.info('pydart initialization OK')
 
         # Create world
-        # skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
-        skel_filename = 'data/skel/fullbody_springStair.skel'
+        skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
+        # skel_filename = 'data/skel/fullbody_springStair.skel'
         self.world = pydart.create_world(1.0 / 1000.0, skel_filename)
         logger.info('pydart create_world OK: dt = %f' % self.world.dt)
 
@@ -47,8 +45,8 @@ class Simulation(object):
         logger.info('modify reference motions OK: # %d' % self.ref.num_frames)
 
         # Contruct the mutable motion
-        self.motion = StepOffsetMotion(self.skel, self.ref)
-        self.motion.set_stair_info(self.stair)
+        # self.motion = StepOffsetMotion(self.skel, self.ref, self.stair)
+        self.motion = RadialBasisMotion(self.skel, self.ref, self.stair)
 
         # Create the controller
         self.skel.controller = Controller(self.skel,
@@ -64,20 +62,28 @@ class Simulation(object):
         logger.info('set the initial pose OK')
 
     def reset(self):
-        print self.motion.params
-        self.stair.set_activation(self.motion.params[-1])
-        self.stair.reset()
-        self.skel.q = self.motion.pose_at_frame(0, isRef=True)
-        q = self.skel.q
-        # # q[3] -= 0.01
-        # q['j_thigh_left_z'] += 0.15
-        # q['j_shin_left'] -= 0.33
-        # q['j_heel_left_1'] += 0.15
-        self.skel.q = q
-        self.skel.qdot = 1.0 * self.motion.velocity_at_frame(0, isRef=True)
+        # z = np.zeros(self.skel.ndofs)
+        # self.skel.qdot = z
+        # z[1] = 100.0
+        # self.skel.q = z
+        # con = self.skel.controller
+        # self.skel.controller = None
+        # for i in range(10):
+        #     self.world.step()
+        # self.skel.controller = con
+        # self.world.reset()
 
+        # self.stair.set_activation(self.motion.params[-1])
+        # self.stair.reset()
         self.world.reset()
-        self.world.reset()
+        q = self.motion.pose_at_frame(0, isRef=True)
+        q = pydart.SkelVector(q, self.skel)
+        q['j_heel_right_1'] += 0.05
+        self.skel.q = q
+        self.skel.qdot = self.motion.velocity_at_frame(0, isRef=True)
+
+        # self.world.reset()
+
         # self.logger.info('reset OK')
 
         # if self.reset_counter % 100 == 0:
@@ -123,7 +129,8 @@ class Simulation(object):
         return self.world.contacts()
 
     def update_to_target(self):
-        q = self.ref.pose_at(self.target_index, self.skel.id)
+        # q = self.ref.pose_at(self.target_index, self.skel.id)
+        q = self.motion.pose_at_frame(self.target_index, self.skel.id)
         self.skel.q = q
 
         # t = float(self.target_index) / 2000.0

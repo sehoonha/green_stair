@@ -53,10 +53,13 @@ class Controller:
 
         m = self.skel.m
         g = 9.81
-        if t < 1.0:
-            tau += self.jt.apply('h_heel_right', [0, -m * g, 0])
-        else:
-            tau += self.jt.apply('h_heel_left', [0, -m * g, 0])
+        T = 0.8
+        i = int(t / T)
+        swing = 'left' if i % 2 == 0 else 'right'
+        stance = 'right' if i % 2 == 0 else 'left'
+
+        tau += self.jt.apply('h_heel_%s' % stance, [0, -m * g, 0])
+        tau += self.jt.apply('h_heel_%s' % swing, [0, 10.0 * g, 0])
 
         # if 0.3 < t and t < 0.40:
         #     tau += self.jt.apply('h_shin_left', [0, 500, 0])
