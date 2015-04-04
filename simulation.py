@@ -18,8 +18,8 @@ class Simulation(object):
         logger.info('pydart initialization OK')
 
         # Create world
-        skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
-        # skel_filename = 'data/skel/fullbody_springStair.skel'
+        # skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
+        skel_filename = 'data/skel/fullbody_springStair.skel'
         self.world = pydart.create_world(1.0 / 1000.0, skel_filename)
         logger.info('pydart create_world OK: dt = %f' % self.world.dt)
 
@@ -34,6 +34,7 @@ class Simulation(object):
         # self.stair = self.world.skels[1]
         # self.stair.set_mobile(False)
         self.stair = SpringStair(self.world)
+        self.stair.set_activation(0.0)
 
         # Load the reference motion
         self.ref = FileInfoWorld()
@@ -74,7 +75,7 @@ class Simulation(object):
         # self.world.reset()
 
         # self.stair.set_activation(self.motion.params[-1])
-        # self.stair.reset()
+        self.stair.reset()
         self.world.reset()
         q = self.motion.pose_at_frame(0, isRef=True)
         q = pydart.SkelVector(q, self.skel)
@@ -86,7 +87,7 @@ class Simulation(object):
 
         # self.logger.info('reset OK')
 
-        # if self.reset_counter % 100 == 0:
+        # if self.reset_counter % 50 == 0:
         #     h = hpy()
         #     print h.heap()
         # self.reset_counter += 1
@@ -149,10 +150,12 @@ class Simulation(object):
             print self.target_index
             self.target_index = (self.target_index - 10) % self.ref.num_frames
             self.update_to_target()
-        elif key == 'O':
-            # solver = MotionOptimizer(self.motion, self.evaluator)
-            self.solver = Optimizer(self, self.motion)
-            # solver.solve()
-            self.solver.launch()
-        elif key == 'K':
-            self.solver.to_be_killed = True
+
+    def optimize(self):
+        # solver = MotionOptimizer(self.motion, self.evaluator)
+        self.solver = Optimizer(self, self.motion)
+        # solver.solve()
+        self.solver.launch()
+
+    def kill_optimizer(self):
+        self.solver.to_be_killed = True

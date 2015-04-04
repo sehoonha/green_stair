@@ -4,6 +4,8 @@ import cma
 import numpy as np
 from numpy.linalg import norm
 import math
+import os
+import glob
 
 
 def optimizer_worker(opt):
@@ -32,9 +34,9 @@ class Optimizer(object):
         skel = self.sim.skel
         world = self.sim.world
 
-        num_steps = 3
+        num_steps = self.step_index + 1
         MAX_TIME = float(num_steps) * self.sim.stair.step_duration
-        self.motion.set_params(_x)
+        self.motion.set_params(_x, self.step_index)
         self.sim.reset()
         v = 0.0
         v_1 = 0.0
@@ -66,9 +68,11 @@ class Optimizer(object):
 
         # Final COMdot to the initial frame (continuous momentum)
         Cdothat_T = np.array(self.motion.ref_com_dot_at_frame(0))
-        Cdothat_T[0] *= 0.8
-        if num_steps % 2 == 1:
+        if num_steps == 1:
+            Cdothat_T[0] *= 0.6
             Cdothat_T[2] *= -1
+        elif num_steps == 2:
+            Cdothat_T[0] *= 0.8
         w_cd = np.array([10.0, 0.5, 10.0])
         v_cd = 10.0 * norm((skel.Cdot - Cdothat_T) * w_cd) ** 2
         self.logger.info('%s, %s --> %f' % (Cdothat_T, skel.Cdot, v_cd))
@@ -98,18 +102,47 @@ class Optimizer(object):
         self.logger.info('')
         return v
 
-    def solve(self):
+    def solve_step(self, step_index):
+        self.step_index = step_index
         opts = cma.CMAOptions()
         opts.set('verb_disp', 1)
         opts.set('ftarget', 5.0)
         opts.set('popsize', 32)
-        opts.set('maxiter', 1000)
+        opts.set('maxiter', 100)
 
-        # dim = self.motion.num_params()
+        # dim = self.motion.num_params(self.step_index)
         # x0 = np.zeros(dim)
-        x0 = self.motion.params
+        x0 = self.motion.params_at_step(self.step_index)
+        self.logger.info('')
+        self.logger.info('')
         self.logger.info('------------------ CMA-ES ------------------')
-        res = cma.fmin(self.cost, x0, 0.2, opts)
+        self.logger.info('  step_index = %d' % self.step_index)
+        res = cma.fmin(self.cost, x0, 0.1, opts)
         self.logger.info('--------------------------------------------')
         self.logger.info('solution: %s' % repr(res[0]))
         self.logger.info('value: %.6f' % res[1])
+        self.logger.info('--------------------------------------------')
+        self.logger.info('  set parameters for step = %d' % self.step_index)
+        self.motion.set_params(res[0], self.step_index)
+        self.logger.info('  copy result files step = %d' % self.step_index)
+        for fin in glob.glob('outcmaes*.dat'):
+            fout = fin.replace('outcmaes', 'step%d_outcmaes' % self.step_index)
+            cmd = 'mv %s %s' % (fin, fout)
+            self.logger.info('cmd = [%s]' % cmd)
+            os.system(cmd)
+        return res
+
+    def solve(self):
+        max_step = 2
+        answers = []
+        for step in range(max_step):
+            res = self.solve_step(step)
+            answers.append(res)
+        self.logger.info('--------------- all results ----------------')
+        for res in answers:
+            self.logger.info('solution: %s' % repr(res[0]))
+            self.logger.info('value: %.6f' % res[1])
+        self.logger.info('--------------------------------------------')
+        self.logger.info('---------------- parameters ----------------')
+        self.logger.info('optimal parameters: %s' % repr(self.motion.params))
+        self.logger.info('--------------------------------------------')
