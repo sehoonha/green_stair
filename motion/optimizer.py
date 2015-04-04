@@ -51,7 +51,7 @@ class Optimizer(object):
             H = skel.body('h_head').C
             Hhat = self.motion.ref_head_at_frame(world.frame)
             dist = 0.5 * norm(H - Hhat) ** 2
-            v_2 += 2.0 * dist
+            v_2 += dist
 
             # Check falling
             MaxDeltaC = np.array([0.4, 0.4, 0.2])
@@ -65,8 +65,13 @@ class Optimizer(object):
         v_c = 1000.0 * norm(skel.C - Chat_T) ** 2
 
         # Final COMdot to the initial frame (continuous momentum)
-        Cdothat_T = self.motion.ref_com_dot_at_frame(0)
-        v_cd = 10.0 * norm(skel.Cdot - Cdothat_T) ** 2
+        Cdothat_T = np.array(self.motion.ref_com_dot_at_frame(0))
+        Cdothat_T[0] *= 0.8
+        if num_steps % 2 == 1:
+            Cdothat_T[2] *= -1
+        w_cd = np.array([10.0, 0.5, 10.0])
+        v_cd = 10.0 * norm((skel.Cdot - Cdothat_T) * w_cd) ** 2
+        self.logger.info('%s, %s --> %f' % (Cdothat_T, skel.Cdot, v_cd))
 
         # Final foot location
         if num_steps % 2 == 1:
@@ -100,8 +105,9 @@ class Optimizer(object):
         opts.set('popsize', 32)
         opts.set('maxiter', 1000)
 
-        dim = self.motion.num_params()
-        x0 = np.zeros(dim)
+        # dim = self.motion.num_params()
+        # x0 = np.zeros(dim)
+        x0 = self.motion.params
         self.logger.info('------------------ CMA-ES ------------------')
         res = cma.fmin(self.cost, x0, 0.2, opts)
         self.logger.info('--------------------------------------------')
