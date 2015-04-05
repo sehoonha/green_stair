@@ -61,6 +61,7 @@ cpatures/*
 # Data
 *.json
 *.dat
+*.png
 build_green/*
 build_normal/*
 build_*/*

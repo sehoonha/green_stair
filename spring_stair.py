@@ -51,6 +51,7 @@ class SpringStair(object):
                 # self.logger.info('Activate %s at %f' % (params['name'], t))
 
     def set_activation(self, dt):
+        self._activation = dt
         for i, params in enumerate(self.stairs):
             T = self.step_duration
             params['activation'] = float(i) * T + dt

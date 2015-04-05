@@ -6,6 +6,7 @@ from controller import Controller
 import gltools
 from spring_stair import SpringStair
 from motion import StepOffsetMotion, RadialBasisMotion, Optimizer
+from plotter_torque import PlotterTorque
 # from guppy import hpy
 
 
@@ -34,7 +35,7 @@ class Simulation(object):
         # self.stair = self.world.skels[1]
         # self.stair.set_mobile(False)
         self.stair = SpringStair(self.world)
-        self.stair.set_activation(0.1)
+        self.stair.set_activation(0.2)
 
         # Load the reference motion
         self.ref = FileInfoWorld()
@@ -159,3 +160,8 @@ class Simulation(object):
 
     def kill_optimizer(self):
         self.solver.to_be_killed = True
+
+    def plot_torques(self):
+        pl = PlotterTorque()
+        title = 'Stair(%.3f)' % self.stair._activation
+        pl.plot(self.skel.controller, title)

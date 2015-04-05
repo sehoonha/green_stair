@@ -17,6 +17,7 @@ class Window(PyDartQtWindow):
 
         self.optAction = self.createAction('Opt', self.optEvent)
         self.killAction = self.createAction('Kill', self.killEvent)
+        self.plotAction = self.createAction('Plot', self.plotEvent)
 
     def initToolbar(self):
         self.timeText = QtGui.QLabel('Time: 0.0000', self)
@@ -25,7 +26,8 @@ class Window(PyDartQtWindow):
         # "list[x:x] += list2" is Python idiom for add list to the another list
 
         my_toolbar_actions = [self.printAction, self.timeText, None,
-                              self.optAction, self.killAction, None]
+                              self.optAction, self.killAction,
+                              self.plotAction, None]
         self.toolbar_actions[4:4] += my_toolbar_actions
 
         # Call the parent function to initialize the toolbar
@@ -59,6 +61,9 @@ class Window(PyDartQtWindow):
 
     def killEvent(self):
         self.sim.kill_optimizer()
+
+    def plotEvent(self):
+        self.sim.plot_torques()
 
     def cam0Event(self):
         """ Change the default camera """

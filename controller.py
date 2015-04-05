@@ -26,12 +26,16 @@ class Controller:
 
         # Jacobian transpose
         self.jt = JTController(self.skel)
+        self.reset()
 
     # def update_target_by_frame(self, frame_idx):
     #     if frame_idx < self.ref.num_frames:
     #         self.qhat = self.ref.pose_at(frame_idx, skel_id=0)
     #         I = self.skel.dof_indices(['j_heel_left_1', 'j_heel_right_1'])
     #         self.qhat[I] += 0.2
+
+    def reset(self):
+        self.torque_history = []
 
     def compute(self):
         skel = self.skel
@@ -67,4 +71,5 @@ class Controller:
 
         # Make sure the first six are zero
         tau[:6] = 0
+        self.torque_history.append(tau)
         return tau
