@@ -28,8 +28,10 @@ class Optimizer(object):
         self.logger.info('thread started')
 
     def cost(self, _x):
+        self.eval_counter += 1
         if self.to_be_killed:
             return 10e8
+        self.logger.info('eval #%d' % self.eval_counter)
 
         skel = self.sim.skel
         world = self.sim.world
@@ -69,7 +71,7 @@ class Optimizer(object):
         # Final COMdot to the initial frame (continuous momentum)
         Cdothat_T = np.array(self.motion.ref_com_dot_at_frame(0))
         if num_steps == 1:
-            Cdothat_T[0] *= 0.6
+            Cdothat_T[0] *= 0.8
             Cdothat_T[2] *= -1
         elif num_steps == 2:
             Cdothat_T[0] *= 0.8
@@ -84,25 +86,25 @@ class Optimizer(object):
         else:
             swing_foot = skel.body('h_toe_right').C
             swing_foot_hat = self.motion.ref_rfoot_at_frame(final_frame_index)
-        v_f = 1000.0 * norm(swing_foot - swing_foot_hat) ** 2
-
-        # Range check (0.05 --> 5000.0?)
-        bound_penalty = 0.0
-        # if _x[-1] < 0.0:
-        #     bound_penalty += (0.0 - _x[-1]) ** 2
-        # if _x[-1] > 0.2:
-        #     bound_penalty += (_x[-1] - 0.2) ** 2
+        w_f = np.array([1.0, 10.0, 1.0])
+        v_f = 1000.0 * norm((swing_foot - swing_foot_hat) * w_f) ** 2
 
         v = v_1 + v_2 + v_c + v_cd + v_f
-        v = 10.0 * v + 500.0 * (MAX_TIME - world.t) + 10e5 * bound_penalty
+        v = 10.0 * v + 500.0 * (MAX_TIME - world.t)
         self.logger.info('%.6f (%.4f) <-- %.4f %.4f %.4f %.4f %.4f' %
                          (v, world.t, v_1, v_2, v_c, v_cd, v_f))
 
         self.logger.info('%s' % repr(list(_x)))
         self.logger.info('')
+        if self.eval_counter % 32 == 0:
+            for i in range(5):
+                self.logger.info('')
+
         return v
 
     def solve_step(self, step_index):
+        self.to_be_killed = False
+        self.eval_counter = 0
         self.step_index = step_index
         opts = cma.CMAOptions()
         opts.set('verb_disp', 1)
@@ -130,6 +132,7 @@ class Optimizer(object):
             cmd = 'mv %s %s' % (fin, fout)
             self.logger.info('cmd = [%s]' % cmd)
             os.system(cmd)
+        self.to_be_killed = False
         return res
 
     def solve(self):

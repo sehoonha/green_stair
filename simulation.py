@@ -34,7 +34,7 @@ class Simulation(object):
         # self.stair = self.world.skels[1]
         # self.stair.set_mobile(False)
         self.stair = SpringStair(self.world)
-        self.stair.set_activation(0.0)
+        self.stair.set_activation(0.1)
 
         # Load the reference motion
         self.ref = FileInfoWorld()
@@ -130,8 +130,8 @@ class Simulation(object):
         return self.world.contacts()
 
     def update_to_target(self):
-        # q = self.ref.pose_at(self.target_index, self.skel.id)
-        q = self.motion.pose_at_frame(self.target_index, self.skel.id)
+        q = self.ref.pose_at(self.target_index, self.skel.id)
+        # q = self.motion.pose_at_frame(self.target_index, self.skel.id)
         self.skel.q = q
 
         # t = float(self.target_index) / 2000.0

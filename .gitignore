@@ -63,3 +63,4 @@ cpatures/*
 *.dat
 build_green/*
 build_normal/*
+build_*/*
