@@ -36,13 +36,14 @@ class Optimizer(object):
         skel = self.sim.skel
         world = self.sim.world
 
-        num_steps = self.step_index + 1
+        num_steps = self.step_index + 1 if self.step_index != -1 else 2
         MAX_TIME = float(num_steps) * self.sim.stair.step_duration
         self.motion.set_params(_x, self.step_index)
         self.sim.reset()
         v = 0.0
         v_1 = 0.0
         v_2 = 0.0
+        v_sk = 0.0
         balanced = True
         while world.t < MAX_TIME and balanced:
             self.sim.step()
@@ -63,6 +64,16 @@ class Optimizer(object):
                 if math.fabs(skel.C[i] - Chat[i]) > MaxDeltaC[i]:
                     balanced = False
 
+            sim_step = int(world.t / self.sim.stair.step_duration) + 1
+            if sim_step % 2 == 1:
+                stance_foot = skel.body('h_toe_right').C
+                stance_foot_hat = self.motion.ref_rfoot_at_frame(world.frame)
+            else:
+                stance_foot = skel.body('h_toe_left').C
+                stance_foot_hat = self.motion.ref_lfoot_at_frame(world.frame)
+            w_sk = np.array([5.0, 1.0, 1.0])
+            v_sk += 0.5 * norm((stance_foot - stance_foot_hat) * w_sk) ** 2
+
         # Give more penalty to the final frame
         final_frame_index = int(MAX_TIME / world.dt)
         Chat_T = self.motion.ref_com_at_frame(final_frame_index)
@@ -71,10 +82,10 @@ class Optimizer(object):
         # Final COMdot to the initial frame (continuous momentum)
         Cdothat_T = np.array(self.motion.ref_com_dot_at_frame(0))
         if num_steps == 1:
-            Cdothat_T[0] *= 1.0
+            Cdothat_T[0] *= 0.8
             Cdothat_T[2] *= -1
         elif num_steps == 2:
-            Cdothat_T[0] *= 1.0
+            Cdothat_T[0] *= 0.8
         w_cd = np.array([10.0, 0.5, 10.0])
         v_cd = 10.0 * norm((skel.Cdot - Cdothat_T) * w_cd) ** 2
         self.logger.info('%s, %s --> %f' % (Cdothat_T, skel.Cdot, v_cd))
@@ -89,10 +100,10 @@ class Optimizer(object):
         w_f = np.array([1.0, 10.0, 1.0])
         v_f = 1000.0 * norm((swing_foot - swing_foot_hat) * w_f) ** 2
 
-        v = v_1 + v_2 + v_c + v_cd + v_f
+        v = v_1 + v_2 + v_sk + v_c + v_cd + v_f
         v = 10.0 * v + 500.0 * (MAX_TIME - world.t)
-        self.logger.info('%.6f (%.4f) <-- %.4f %.4f %.4f %.4f %.4f' %
-                         (v, world.t, v_1, v_2, v_c, v_cd, v_f))
+        self.logger.info('%.6f (%.4f) <-- %.4f %.4f %.4f %.4f %.4f %.4f' %
+                         (v, world.t, v_1, v_2, v_sk, v_c, v_cd, v_f))
 
         self.logger.info('%s' % repr(list(_x)))
         self.logger.info('')
@@ -119,7 +130,7 @@ class Optimizer(object):
         self.logger.info('')
         self.logger.info('------------------ CMA-ES ------------------')
         self.logger.info('  step_index = %d' % self.step_index)
-        res = cma.fmin(self.cost, x0, 0.1, opts)
+        res = cma.fmin(self.cost, x0, 0.2, opts)
         self.logger.info('--------------------------------------------')
         self.logger.info('solution: %s' % repr(res[0]))
         self.logger.info('value: %.6f' % res[1])
@@ -141,6 +152,9 @@ class Optimizer(object):
         for step in range(max_step):
             res = self.solve_step(step)
             answers.append(res)
+        # res = self.solve_step(-1)
+        # answers.append(res)
+
         self.logger.info('--------------- all results ----------------')
         for res in answers:
             self.logger.info('solution: %s' % repr(res[0]))

@@ -43,13 +43,24 @@ class Window(PyDartQtWindow):
         self.timeText.setText('T: %.4f' % self.sim.world.t)
 
     def loadEvent(self):
-        filename = 'output.json'
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open file',
+                                                     '.', '*.json')
+        if len(filename) == 0:
+            self.logger.warning('cancel the load')
+            return
         self.sim.motion.load(filename)
         self.logger.info('load file: ' + filename)
         self.sim.reset()
 
     def saveEvent(self):
-        filename = 'output.json'
+        filename = QtGui.QFileDialog.getSaveFileName(self, 'Save file',
+                                                     '.', '*.json')
+        if len(filename) == 0:
+            self.logger.warning('cancel the save')
+            return
+        if '.json' not in filename[-5:]:
+            filename += '.json'
+
         self.sim.motion.save(filename)
         self.logger.info('save file: ' + filename)
 

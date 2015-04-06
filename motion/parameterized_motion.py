@@ -1,5 +1,6 @@
 import numpy as np
 from pydart import SkelVector
+import jsonpickle
 
 
 class ParameterizedMotion(object):
@@ -103,3 +104,14 @@ class ParameterizedMotion(object):
         q2 = self.pose_at_frame(-1, isRef)
         vel = (0.5 * q0 - 2.0 * q1 + 1.5 * q2) / h
         return vel
+
+    def load(self, filename):
+        with open(filename, 'r') as fin:
+            frozen = fin.read()
+            params = jsonpickle.decode(frozen)
+            self.set_params(params)
+
+    def save(self, filename):
+        with open(filename, 'w+') as fout:
+            frozen = jsonpickle.encode(self.params)
+            fout.write(frozen)

@@ -64,18 +64,7 @@ class Simulation(object):
         logger.info('set the initial pose OK')
 
     def reset(self):
-        # z = np.zeros(self.skel.ndofs)
-        # self.skel.qdot = z
-        # z[1] = 100.0
-        # self.skel.q = z
-        # con = self.skel.controller
-        # self.skel.controller = None
-        # for i in range(10):
-        #     self.world.step()
-        # self.skel.controller = con
-        # self.world.reset()
-
-        # self.stair.set_activation(self.motion.params[-1])
+        self.skel.controller.reset()
         self.stair.reset()
         self.world.reset()
         q = self.motion.pose_at_frame(0, isRef=True)
@@ -83,11 +72,6 @@ class Simulation(object):
         q['j_heel_right_1'] += 0.05
         self.skel.q = q
         self.skel.qdot = self.motion.velocity_at_frame(0, isRef=True)
-
-        # self.world.reset()
-
-        # self.logger.info('reset OK')
-
         # if self.reset_counter % 50 == 0:
         #     h = hpy()
         #     print h.heap()
@@ -135,12 +119,6 @@ class Simulation(object):
         # q = self.motion.pose_at_frame(self.target_index, self.skel.id)
         self.skel.q = q
 
-        # t = float(self.target_index) / 2000.0
-        # # q = self.motion.pose_at(t)
-        # q = self.planner.pose_at(self.target_index)
-        # self.skel.q = q
-        # self.logger.info('time: %f\n%s' % (t, str(self.evaluator)))
-
     def key_pressed(self, key):
         # self.logger.info('key pressed: [%s]' % key)
         if key == ']':
@@ -153,9 +131,7 @@ class Simulation(object):
             self.update_to_target()
 
     def optimize(self):
-        # solver = MotionOptimizer(self.motion, self.evaluator)
         self.solver = Optimizer(self, self.motion)
-        # solver.solve()
         self.solver.launch()
 
     def kill_optimizer(self):
@@ -163,5 +139,8 @@ class Simulation(object):
 
     def plot_torques(self):
         pl = PlotterTorque()
-        title = 'Stair(%.3f)' % self.stair._activation
+        if self.stair.num_steps() == 0:
+            title = 'Normal Stair'
+        else:
+            title = 'Stair(%.3f)' % self.stair._activation
         pl.plot(self.skel.controller, title)

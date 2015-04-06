@@ -33,6 +33,9 @@ class SpringStair(object):
                     continue
                 self.logger.info('  %s: %s' % (k, v))
 
+    def num_steps(self):
+        return len(self.stairs)
+
     def reset(self):
         for params in self.stairs:
             skel = params['skel']
