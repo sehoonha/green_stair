@@ -82,7 +82,7 @@ class Optimizer(object):
         # Final COMdot to the initial frame (continuous momentum)
         Cdothat_T = np.array(self.motion.ref_com_dot_at_frame(0))
         if num_steps == 1:
-            Cdothat_T[0] *= 0.8
+            Cdothat_T[0] *= 0.6
             Cdothat_T[2] *= -1
         elif num_steps == 2:
             Cdothat_T[0] *= 0.8

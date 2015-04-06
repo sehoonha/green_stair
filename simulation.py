@@ -11,7 +11,7 @@ from plotter_torque import PlotterTorque
 
 
 class Simulation(object):
-    def __init__(self):
+    def __init__(self, step_activation=None):
         self.logger = logging.getLogger(__name__)
         logger = self.logger
         # Init pydart
@@ -19,8 +19,10 @@ class Simulation(object):
         logger.info('pydart initialization OK')
 
         # Create world
-        # skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
-        skel_filename = 'data/skel/fullbody_springStair.skel'
+        if step_activation is None:
+            skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
+        else:
+            skel_filename = 'data/skel/fullbody_springStair.skel'
         self.world = pydart.create_world(1.0 / 1000.0, skel_filename)
         logger.info('pydart create_world OK: dt = %f' % self.world.dt)
 
@@ -35,7 +37,8 @@ class Simulation(object):
         # self.stair = self.world.skels[1]
         # self.stair.set_mobile(False)
         self.stair = SpringStair(self.world)
-        self.stair.set_activation(0.2)
+        logger.info('set step activation: %s' % step_activation)
+        self.stair.set_activation(step_activation)
 
         # Load the reference motion
         self.ref = FileInfoWorld()
