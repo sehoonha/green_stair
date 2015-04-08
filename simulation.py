@@ -83,7 +83,7 @@ class Simulation(object):
     def step(self):
         self.stair.apply_force()
 
-        i = self.world.frame
+        i = max(self.world.frame, -200)
         c = self.skel.controller
         c.qhat = self.motion.pose_at_frame(i, isRef=False)
         c.qdhat = self.motion.velocity_at_frame(i, isRef=True)

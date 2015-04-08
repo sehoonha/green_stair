@@ -35,7 +35,10 @@ class Controller:
     #         self.qhat[I] += 0.2
 
     def reset(self):
-        self.torque_history = []
+        self.history = dict()
+        self.history['tau'] = list()
+        self.history['q'] = list()
+        self.history['qdot'] = list()
 
     def compute(self):
         skel = self.skel
@@ -71,5 +74,7 @@ class Controller:
 
         # Make sure the first six are zero
         tau[:6] = 0
-        self.torque_history.append(tau)
+        self.history['q'].append(skel.q)
+        self.history['qdot'].append(skel.qdot)
+        self.history['tau'].append(tau)
         return tau

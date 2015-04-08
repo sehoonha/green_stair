@@ -38,6 +38,7 @@ class Optimizer(object):
 
         num_steps = self.step_index + 1 if self.step_index != -1 else 2
         MAX_TIME = float(num_steps) * self.sim.stair.step_duration
+        MAX_TIME += 0.2
         self.motion.set_params(_x, self.step_index)
         self.sim.reset()
         v = 0.0
@@ -107,9 +108,9 @@ class Optimizer(object):
 
         self.logger.info('%s' % repr(list(_x)))
         self.logger.info('')
-        if self.eval_counter % 32 == 0:
+        if self.eval_counter % 48 == 0:
             for i in range(5):
-                self.logger.info('')
+                self.logger.info('    >==============<')
 
         return v
 
@@ -120,8 +121,8 @@ class Optimizer(object):
         opts = cma.CMAOptions()
         opts.set('verb_disp', 1)
         opts.set('ftarget', 5.0)
-        opts.set('popsize', 32)
-        opts.set('maxiter', 100)
+        opts.set('popsize', 48)
+        opts.set('maxiter', 150)
 
         # dim = self.motion.num_params(self.step_index)
         # x0 = np.zeros(dim)
