@@ -14,6 +14,7 @@ class Controller:
         ndofs = self.skel.ndofs
         self.qhat = self.skel.q
         self.qdhat = np.zeros(ndofs)
+        self.q_ref = np.zeros(ndofs)
         # self.Kp = np.diagflat([0.0] * 6 + [450.0] * (ndofs - 6))
         self.Kp = np.diagflat([0.0] * 6 + [520.0] * (ndofs - 6))
         self.Kd = np.diagflat([0.0] * 6 + [40.0] * (ndofs - 6))
@@ -38,7 +39,9 @@ class Controller:
         self.history = dict()
         self.history['tau'] = list()
         self.history['q'] = list()
+        self.history['q_ref'] = list()
         self.history['qdot'] = list()
+        self.history['toe_contact'] = list()
 
     def compute(self):
         skel = self.skel
@@ -75,6 +78,10 @@ class Controller:
         # Make sure the first six are zero
         tau[:6] = 0
         self.history['q'].append(skel.q)
+        self.history['q_ref'].append(self.q_ref)
         self.history['qdot'].append(skel.qdot)
         self.history['tau'].append(tau)
+        toe_contact = 'h_toe_right' in skel.contacted_body_names() or \
+                      'h_heel_right' in skel.contacted_body_names()
+        self.history['toe_contact'].append(toe_contact)
         return tau

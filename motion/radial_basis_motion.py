@@ -49,7 +49,7 @@ class RadialBasisMotion(ParameterizedMotion):
         self.num_steps = 2
         num_steps = self.num_steps
         for i, H in enumerate(np.arange(0.0, T * (num_steps - 1) + 1e-5, T)):
-            H += 0.2
+            # H += 0.2
             self.logger.info('add a set of basis for %d, %f' % (i, H))
             swing = 'left' if i % 2 == 0 else 'right'
             stance = 'right' if i % 2 == 0 else 'left'
@@ -73,7 +73,7 @@ class RadialBasisMotion(ParameterizedMotion):
             self.add(('j_thigh_left_z', 'j_thigh_right_z'),
                      0.0, 0.2, H + 0.7, i)
             self.add(('j_thigh_%s_x' % stance), 0.0, 0.2, H + 0.4, i)
-            self.add(('j_thigh_%s_x' % stance), 0.0, 0.2, H + 0.0, i)
+            # self.add(('j_thigh_%s_x' % stance), 0.0, 0.2, H + 0.0, i)
 
         self.logger.info('num params = %d' % self.num_params())
 

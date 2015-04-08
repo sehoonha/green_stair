@@ -83,10 +83,13 @@ class Simulation(object):
     def step(self):
         self.stair.apply_force()
 
-        i = max(self.world.frame, -200)
+        # i = max(self.world.frame, -200)
+        i = max(self.world.frame, 0)
         c = self.skel.controller
         c.qhat = self.motion.pose_at_frame(i, isRef=False)
+        c.q_ref = self.motion.pose_at_frame(i, isRef=True)
         c.qdhat = self.motion.velocity_at_frame(i, isRef=True)
+        # print i, self.skel.contacted_body_names()
 
         self.world.step()
 
