@@ -46,7 +46,7 @@ class RadialBasisMotion(ParameterizedMotion):
 
         self.basis = []
         T = self.step_duration
-        self.num_steps = 2
+        self.num_steps = 3
         num_steps = self.num_steps
         for i, H in enumerate(np.arange(0.0, T * (num_steps - 1) + 1e-5, T)):
             # H += 0.2
@@ -91,7 +91,7 @@ class RadialBasisMotion(ParameterizedMotion):
         #       -0.25763609, 0.20675982, 0.32819063, 0.5467555, -0.16351248,
         #       -0.04469256, 0.61370465, -0.08121555, -0.55214494, -0.47528739]
         x0 = np.zeros(self.num_params())
-
+        self.params = x0
         self.set_params(x0)
 
     def add(self, dof, w0, s0, t0, step=-1):
@@ -130,11 +130,17 @@ class RadialBasisMotion(ParameterizedMotion):
             basis = self.basis_at_step(step_index)
         else:
             basis = self.basis
-            self.params = params
+            n = len(self.params)
+            m = len(params)
+            self.params[:m] = params
+            if m < n:
+                self.params[m:n] = params[n - m:]
         m = basis[0].num_params()
         for i, b in enumerate(basis):
             lo = m * i
             hi = m * (i + 1)
+            if lo >= len(params):
+                continue
             b.set_params(params[lo:hi])
 
     def parameterized_pose_at_frame(self, frame_index):

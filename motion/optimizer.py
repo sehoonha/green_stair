@@ -87,6 +87,9 @@ class Optimizer(object):
             Cdothat_T[2] *= -1
         elif num_steps == 2:
             Cdothat_T[0] *= 0.8
+        elif num_steps == 3:
+            Cdothat_T[0] *= 0.8
+            Cdothat_T[2] *= -1
         w_cd = np.array([10.0, 0.5, 10.0])
         v_cd = 10.0 * norm((skel.Cdot - Cdothat_T) * w_cd) ** 2
         self.logger.info('%s, %s --> %f' % (Cdothat_T, skel.Cdot, v_cd))
@@ -121,8 +124,12 @@ class Optimizer(object):
         opts = cma.CMAOptions()
         opts.set('verb_disp', 1)
         opts.set('ftarget', 5.0)
-        opts.set('popsize', 48)
-        opts.set('maxiter', 150)
+        if step_index == 0:
+            opts.set('popsize', 32)
+            opts.set('maxiter', 100)
+        else:
+            opts.set('popsize', 48)
+            opts.set('maxiter', 150)
 
         # dim = self.motion.num_params(self.step_index)
         # x0 = np.zeros(dim)
@@ -148,7 +155,7 @@ class Optimizer(object):
         return res
 
     def solve(self):
-        max_step = 2
+        max_step = 3
         answers = []
         for step in range(max_step):
             res = self.solve_step(step)
