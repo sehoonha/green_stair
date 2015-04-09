@@ -12,6 +12,8 @@ from plotter_torque import PlotterTorque
 
 class Simulation(object):
     def __init__(self, step_activation=None):
+        self.prefix = ''
+        self.postfix = ''
         self.logger = logging.getLogger(__name__)
         logger = self.logger
         # Init pydart
@@ -54,7 +56,8 @@ class Simulation(object):
         self.motion = RadialBasisMotion(self.skel, self.ref, self.stair)
 
         # Create the controller
-        self.skel.controller = Controller(self.skel,
+        self.skel.controller = Controller(self,
+                                          self.skel,
                                           self.world.dt,
                                           self.ref)
 
@@ -64,6 +67,7 @@ class Simulation(object):
         # Reset the scene
         self.reset_counter = 0
         self.reset()
+        self.begin_time = 0.0
         logger.info('set the initial pose OK')
 
     def reset(self):
@@ -80,11 +84,19 @@ class Simulation(object):
         #     print h.heap()
         # self.reset_counter += 1
 
+    def get_time(self):
+        return self.world.t + self.begin_time
+
+    def get_frame(self):
+        begin_index = int(1000.0 * self.begin_time)
+        return self.world.frame + begin_index
+
     def step(self):
         self.stair.apply_force()
 
         # i = max(self.world.frame, -200)
-        i = max(self.world.frame, 0)
+        i = max(self.get_frame(), 0)
+
         c = self.skel.controller
         c.qhat = self.motion.pose_at_frame(i, isRef=False)
         c.q_ref = self.motion.pose_at_frame(i, isRef=True)
@@ -107,7 +119,8 @@ class Simulation(object):
         # self.planner.render()
 
     def render_target(self):
-        frame = min(self.world.frame, self.ref.num_frames - 1)
+        # frame = min(self.world.frame, self.ref.num_frames - 1)
+        frame = min(self.get_frame(), self.ref.num_frames - 1)
         self.render_target_at_frame(frame)
 
     def render_target_at_frame(self, frame):
@@ -143,10 +156,21 @@ class Simulation(object):
     def kill_optimizer(self):
         self.solver.to_be_killed = True
 
-    def plot_torques(self):
-        pl = PlotterTorque()
+    def title(self, full=True):
         if self.stair.num_steps() == 0:
             title = 'Normal Stair'
         else:
             title = 'Stair(%.3f)' % self.stair._activation
-        pl.plot(self.skel.controller, title)
+        if not full:
+            return title
+        if len(self.prefix) > 0:
+            title = '%s_%s' % (self.prefix, title)
+        if len(self.postfix) > 0:
+            title = '%s_%s' % (title, self.postfix)
+        return title
+
+    def plot_torques(self):
+        pl = PlotterTorque()
+        pl.prefix = self.prefix
+        pl.postfix = self.postfix
+        pl.plot(self.skel.controller, self.title(False))

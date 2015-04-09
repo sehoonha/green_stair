@@ -5,7 +5,8 @@ from jacobian_transpose import JTController
 
 class Controller:
     """ Add damping force to the skeleton """
-    def __init__(self, skel, h, ref):
+    def __init__(self, sim, skel, h, ref):
+        self.sim = sim
         self.h = h
         self.skel = skel
         self.ref = ref
@@ -52,7 +53,8 @@ class Controller:
         qddot = invM.dot(-skel.c + p + d + skel.constraint_forces())
         tau = p + d - self.Kd.dot(qddot) * self.h
 
-        t = self.skel.world.t
+        # t = self.skel.world.t
+        t = self.sim.get_time()
         # if 0.12 < t and t < 0.30:
         #     # tau += self.jt.apply('h_heel_left', [0, 500, 0])
         #     Cy = self.skel.C[1]
@@ -81,7 +83,7 @@ class Controller:
         self.history['q_ref'].append(self.q_ref)
         self.history['qdot'].append(skel.qdot)
         self.history['tau'].append(tau)
-        toe_contact = 'h_toe_right' in skel.contacted_body_names() or \
-                      'h_heel_right' in skel.contacted_body_names()
+        toe_contact = 'h_toe_left' in skel.contacted_body_names() or \
+                      'h_heel_left' in skel.contacted_body_names()
         self.history['toe_contact'].append(toe_contact)
         return tau

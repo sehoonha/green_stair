@@ -21,7 +21,8 @@ class Window(PyDartQtWindow):
 
     def initToolbar(self):
         self.timeText = QtGui.QLabel('Time: 0.0000', self)
-
+        self.prefix = QtGui.QLineEdit('', self)
+        self.postfix = QtGui.QLineEdit('', self)
         # Update self.toolbar_actions
         # "list[x:x] += list2" is Python idiom for add list to the another list
 

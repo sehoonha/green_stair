@@ -1,19 +1,28 @@
 import logging
 import matplotlib.pyplot as plt
-from math import fabs
+# from math import fabs
 
 
 class PlotterTorque(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        self.prefix = ''
+        self.postfix = ''
+
+    def to_full(self, title):
+        if len(self.prefix) > 0:
+            title = '%s_%s' % (self.prefix, title)
+        if len(self.postfix) > 0:
+            title = '%s_%s' % (title, self.postfix)
+        return title + '.png'
 
     def plot(self, con, title):
         self.plot_torque(con, title)
-        self.plot_joint_angle(con, title, 'joint_hips.png',
+        self.plot_joint_angle(con, title, 'joint_hips',
                               ['j_thigh_left_z', 'j_thigh_right_z'])
-        self.plot_joint_angle(con, title, 'joint_knees.png',
+        self.plot_joint_angle(con, title, 'joint_knees',
                               ['j_shin_left', 'j_shin_right'])
-        self.plot_joint_angle(con, title, 'joint_heels.png',
+        self.plot_joint_angle(con, title, 'joint_heels',
                               ['j_heel_left_1', 'j_heel_right_1'])
         self.plot_toe_off(con, title)
 
@@ -50,13 +59,15 @@ class PlotterTorque(object):
         plt.ylabel('Torques and powers', fontdict=font)
         # plt.legend(pp, self.data.keys(), numpoints=1, fontsize=20)
         # plt.legend(pp, legends, numpoints=1, fontsize=26,
-        plt.axes().set_xlim(0.0, 1.6)  # Walking
+        plt.axes().set_xlim(0.0, 2.4)  # Walking
         plt.axes().set_ylim(-300.0, 600.0)  # Walking
+        plt.axvline(x=0.8, color='k', ls='--')
+        plt.axvline(x=1.6, color='k', ls='--')
         plt.legend(pp, legends, fontsize=26,
                    # bbox_to_anchor=(0.15, 0.15))
                    # loc='lower left')
                    loc='upper right')
-        plt.savefig('torque.png', bbox_inches='tight')
+        plt.savefig(self.to_full('torque'), bbox_inches='tight')
         plt.close(fig)
 
     def plot_joint_angle(self, con, title, filename, joints):
@@ -91,13 +102,15 @@ class PlotterTorque(object):
         plt.ylabel('Joint angles', fontdict=font)
         # plt.legend(pp, self.data.keys(), numpoints=1, fontsize=20)
         # plt.legend(pp, legends, numpoints=1, fontsize=26,
-        plt.axes().set_xlim(0.0, 1.6)  # Walking
+        plt.axes().set_xlim(0.0, 2.4)  # Walking
         plt.axes().set_ylim(-3.14, 3.14)  # Walking
+        plt.axvline(x=0.8, color='k', ls='--')
+        plt.axvline(x=1.6, color='k', ls='--')
         plt.legend(pp, legends, fontsize=26,
                    # bbox_to_anchor=(0.15, 0.15))
                    # loc='lower left')
                    loc='upper right')
-        plt.savefig(filename, bbox_inches='tight')
+        plt.savefig(self.to_full(filename), bbox_inches='tight')
         plt.close(fig)
 
     def plot_toe_off(self, con, title):
@@ -109,7 +122,7 @@ class PlotterTorque(object):
 
         self.logger.info('plot toe_contact')
         toe_contact = con.history['toe_contact']
-        x = [((float(i) / 1000.0) / 1.6) * 100.0
+        x = [((float(i) / 1000.0) / 1.6) * 100.0 - 50.0
              for i in range(len(toe_contact))]
         y = [1.0 if t else 0.0 for t in toe_contact]
         color = 'r'
@@ -122,11 +135,13 @@ class PlotterTorque(object):
         font = {'size': 28}
         plt.xlabel('Time', fontdict=font)
         plt.ylabel('Contacted', fontdict=font)
-        plt.axes().set_xlim(0.0, 100.0)  # Walking
+        plt.axes().set_xlim(-50.0, 100.0)  # Walking
         plt.axes().set_ylim(0, 2.0)  # Walking
+        plt.axvline(x=0.0, color='k', ls='--')
+        plt.axvline(x=50.0, color='k', ls='--')
         plt.legend(pp, legends, fontsize=26,
                    # bbox_to_anchor=(0.15, 0.15))
                    # loc='lower left')
                    loc='upper right')
-        plt.savefig('toe_off.png', bbox_inches='tight')
+        plt.savefig(self.to_full('toe_off'), bbox_inches='tight')
         plt.close(fig)

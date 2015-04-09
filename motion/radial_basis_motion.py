@@ -15,6 +15,7 @@ class RadialBasisDof(object):
         self.t0 = t0
         self.set_params(np.zeros(self.num_params()))
         self.step_index = -1
+        self.time_duration = (0, 100.0)
 
     def num_params(self):
         return 3
@@ -30,6 +31,9 @@ class RadialBasisDof(object):
     def eval(self, x):
         vec = SkelVector(skel=self.skel)
         vec[self.dofs] = 1.0
+        (lo, hi) = self.time_duration
+        if x < lo or hi < x:
+            return 0.0
 
         w = self.w0 + self.w
         s = max(self.s0 + self.s, 0.01)
@@ -55,6 +59,7 @@ class RadialBasisMotion(ParameterizedMotion):
             stance = 'right' if i % 2 == 0 else 'left'
 
             self.current_step = i
+            self.time_duration = (H, H + T)
 
             # Swing leg
             self.add('j_thigh_%s_z' % swing, 0.0, 0.1, H + 0.0, i)
@@ -97,6 +102,7 @@ class RadialBasisMotion(ParameterizedMotion):
     def add(self, dof, w0, s0, t0, step=-1):
         b = RadialBasisDof(self.skel, dof, w0=w0, s0=s0, t0=t0)
         b.step_index = step
+        b.time_duration = self.time_duration
         self.basis.append(b)
 
     def set_stair_info(self, stair):
@@ -146,7 +152,6 @@ class RadialBasisMotion(ParameterizedMotion):
     def parameterized_pose_at_frame(self, frame_index):
         q = self.pose_at_frame(frame_index, isRef=True)
         t = float(frame_index) * self.h
-
         for b in self.basis:
             q += b.eval(t)
         return q

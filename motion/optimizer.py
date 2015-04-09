@@ -36,11 +36,18 @@ class Optimizer(object):
         skel = self.sim.skel
         world = self.sim.world
 
-        num_steps = self.step_index + 1 if self.step_index != -1 else 2
-        MAX_TIME = float(num_steps) * self.sim.stair.step_duration
-        MAX_TIME += 0.2
+        # num_steps = self.step_index + 1 if self.step_index != -1 else 2
+        # MAX_TIME = float(num_steps) * self.sim.stair.step_duration
+        # MAX_TIME += 0.2
+        T = self.sim.stair.step_duration
+        num_steps = self.step_index + 1
+        MAX_TIME = T
         self.motion.set_params(_x, self.step_index)
+        self.sim.begin_time = float(self.step_index) * T
+        self.logger.info('begin_time = %f' % self.sim.begin_time)
         self.sim.reset()
+        if self.init_state is not None:
+            skel.x = self.init_state
         v = 0.0
         v_1 = 0.0
         v_2 = 0.0
@@ -49,13 +56,14 @@ class Optimizer(object):
         while world.t < MAX_TIME and balanced:
             self.sim.step()
             # COM deviation
-            Chat = self.motion.ref_com_at_frame(world.frame)
+            frame = self.sim.get_frame()
+            Chat = self.motion.ref_com_at_frame(frame)
             dist = 0.5 * norm(skel.C - Chat) ** 2
             v_1 += dist
 
             # Head deviation
             H = skel.body('h_head').C
-            Hhat = self.motion.ref_head_at_frame(world.frame)
+            Hhat = self.motion.ref_head_at_frame(frame)
             dist = 0.5 * norm(H - Hhat) ** 2
             v_2 += dist
 
@@ -68,15 +76,17 @@ class Optimizer(object):
             sim_step = int(world.t / self.sim.stair.step_duration) + 1
             if sim_step % 2 == 1:
                 stance_foot = skel.body('h_toe_right').C
-                stance_foot_hat = self.motion.ref_rfoot_at_frame(world.frame)
+                stance_foot_hat = self.motion.ref_rfoot_at_frame(frame)
             else:
                 stance_foot = skel.body('h_toe_left').C
-                stance_foot_hat = self.motion.ref_lfoot_at_frame(world.frame)
+                stance_foot_hat = self.motion.ref_lfoot_at_frame(frame)
             w_sk = np.array([5.0, 1.0, 1.0])
             v_sk += 0.5 * norm((stance_foot - stance_foot_hat) * w_sk) ** 2
 
+        self.final_state = skel.x
+
         # Give more penalty to the final frame
-        final_frame_index = int(MAX_TIME / world.dt)
+        final_frame_index = int((T * num_steps) / world.dt)
         Chat_T = self.motion.ref_com_at_frame(final_frame_index)
         v_c = 1000.0 * norm(skel.C - Chat_T) ** 2
 
@@ -110,6 +120,7 @@ class Optimizer(object):
                          (v, world.t, v_1, v_2, v_sk, v_c, v_cd, v_f))
 
         self.logger.info('%s' % repr(list(_x)))
+        self.logger.info('final %s' % repr(list(skel.x)))
         self.logger.info('')
         if self.eval_counter % 48 == 0:
             for i in range(5):
@@ -123,11 +134,12 @@ class Optimizer(object):
         self.step_index = step_index
         opts = cma.CMAOptions()
         opts.set('verb_disp', 1)
-        opts.set('ftarget', 5.0)
         if step_index == 0:
-            opts.set('popsize', 32)
+            opts.set('ftarget', 100.0)
+            opts.set('popsize', 48)
             opts.set('maxiter', 100)
         else:
+            opts.set('ftarget', 300.0)
             opts.set('popsize', 48)
             opts.set('maxiter', 150)
 
@@ -139,22 +151,27 @@ class Optimizer(object):
         self.logger.info('------------------ CMA-ES ------------------')
         self.logger.info('  step_index = %d' % self.step_index)
         res = cma.fmin(self.cost, x0, 0.2, opts)
+        self.to_be_killed = False
         self.logger.info('--------------------------------------------')
         self.logger.info('solution: %s' % repr(res[0]))
         self.logger.info('value: %.6f' % res[1])
         self.logger.info('--------------------------------------------')
         self.logger.info('  set parameters for step = %d' % self.step_index)
         self.motion.set_params(res[0], self.step_index)
+        self.logger.info('  final and set the new initial state')
+        self.cost(res[0])
+        self.init_state = self.final_state
+        self.logger.info('  final and set the new initial state .. OK')
         self.logger.info('  copy result files step = %d' % self.step_index)
         for fin in glob.glob('outcmaes*.dat'):
             fout = fin.replace('outcmaes', 'step%d_outcmaes' % self.step_index)
             cmd = 'mv %s %s' % (fin, fout)
             self.logger.info('cmd = [%s]' % cmd)
             os.system(cmd)
-        self.to_be_killed = False
         return res
 
     def solve(self):
+        self.init_state = None
         max_step = 3
         answers = []
         for step in range(max_step):
@@ -170,4 +187,7 @@ class Optimizer(object):
         self.logger.info('--------------------------------------------')
         self.logger.info('---------------- parameters ----------------')
         self.logger.info('optimal parameters: %s' % repr(self.motion.params))
+        self.logger.info('--------------------------------------------')
+        self.logger.info('reset begin time')
+        self.sim.begin_time = 0.0
         self.logger.info('--------------------------------------------')

@@ -21,10 +21,25 @@ logger.info('Green stair project')
 utils.jsonpickle_numpy.register_handlers()
 
 step_activation = None
+prefix = ''
+postfix = ''
 if len(sys.argv) > 1:
-    step_activation = float(sys.argv[1])
+    index = 1
+    try:
+        step_activation = float(sys.argv[index])
+        index += 1
+    except ValueError:
+        logger.info('The first argument is not float: %s' % sys.argv[index])
+
+    for i, arg_i in enumerate(sys.argv[index:]):
+        if i == 0:
+            prefix = arg_i
+        elif i == 1:
+            postfix = arg_i
 
 sim = Simulation(step_activation)
-
+sim.prefix = prefix
+sim.postfix = postfix
+logger.info('prefix/postfix = %s/%s' % (sim.prefix, sim.postfix))
 # Run the application
-pydart.qtgui.run(title='Green stair', simulation=sim, cls=Window)
+pydart.qtgui.run(title=sim.title(), simulation=sim, cls=Window)
