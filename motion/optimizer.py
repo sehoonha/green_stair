@@ -42,12 +42,14 @@ class Optimizer(object):
         T = self.sim.stair.step_duration
         num_steps = self.step_index + 1
         MAX_TIME = T
+        # if self.step_index == 0:
+        #     MAX_TIME += 0.2
         self.motion.set_params(_x, self.step_index)
         self.sim.begin_time = float(self.step_index) * T
         self.logger.info('begin_time = %f' % self.sim.begin_time)
         self.sim.reset()
         if self.init_state is not None:
-            skel.x = self.init_state
+            world.x = self.init_state
         v = 0.0
         v_1 = 0.0
         v_2 = 0.0
@@ -56,7 +58,7 @@ class Optimizer(object):
         while world.t < MAX_TIME and balanced:
             self.sim.step()
             # COM deviation
-            frame = self.sim.get_frame()
+            frame = max(self.sim.get_frame(), 0)
             Chat = self.motion.ref_com_at_frame(frame)
             dist = 0.5 * norm(skel.C - Chat) ** 2
             v_1 += dist
@@ -71,6 +73,7 @@ class Optimizer(object):
             MaxDeltaC = np.array([0.4, 0.4, 0.2])
             for i in range(3):
                 if math.fabs(skel.C[i] - Chat[i]) > MaxDeltaC[i]:
+                    print 'unbalanced', i, skel.C[i], Chat[i]
                     balanced = False
 
             sim_step = int(world.t / self.sim.stair.step_duration) + 1
@@ -83,7 +86,7 @@ class Optimizer(object):
             w_sk = np.array([5.0, 1.0, 1.0])
             v_sk += 0.5 * norm((stance_foot - stance_foot_hat) * w_sk) ** 2
 
-        self.final_state = skel.x
+        self.final_state = world.x
 
         # Give more penalty to the final frame
         final_frame_index = int((T * num_steps) / world.dt)
@@ -100,7 +103,7 @@ class Optimizer(object):
         elif num_steps == 3:
             Cdothat_T[0] *= 0.8
             Cdothat_T[2] *= -1
-        w_cd = np.array([10.0, 0.5, 10.0])
+        w_cd = np.array([15.0, 0.5, 10.0])
         v_cd = 10.0 * norm((skel.Cdot - Cdothat_T) * w_cd) ** 2
         self.logger.info('%s, %s --> %f' % (Cdothat_T, skel.Cdot, v_cd))
 
@@ -135,9 +138,9 @@ class Optimizer(object):
         opts = cma.CMAOptions()
         opts.set('verb_disp', 1)
         if step_index == 0:
-            opts.set('ftarget', 100.0)
+            opts.set('ftarget', 150.0)
             opts.set('popsize', 48)
-            opts.set('maxiter', 100)
+            opts.set('maxiter', 150)
         else:
             opts.set('ftarget', 300.0)
             opts.set('popsize', 48)

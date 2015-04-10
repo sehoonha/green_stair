@@ -59,7 +59,11 @@ class RadialBasisMotion(ParameterizedMotion):
             stance = 'right' if i % 2 == 0 else 'left'
 
             self.current_step = i
-            self.time_duration = (H, H + T)
+            if i == 0:
+                self.time_duration = (0.0, H + T)
+            else:
+                self.time_duration = (H, H + T)
+            self.logger.info('time duration = (%f, %f)' % self.time_duration)
 
             # Swing leg
             self.add('j_thigh_%s_z' % swing, 0.0, 0.1, H + 0.0, i)
@@ -70,7 +74,7 @@ class RadialBasisMotion(ParameterizedMotion):
             self.add('j_heel_%s_1' % swing, 0.0, 0.1, H + 0.56, i)
 
             # Stance leg
-            # self.add('j_shin_%s' % stance, 0.0, 0.1, H + 0.0, i)
+            self.add('j_shin_%s' % stance, 0.0, 0.1, H + 0.0, i)
             self.add('j_shin_%s' % stance, 0.0, 0.1, H + 0.4, i)
             self.add('j_heel_%s_1' % stance, 0.0, 0.1, H + 0.6, i)
 
@@ -78,7 +82,7 @@ class RadialBasisMotion(ParameterizedMotion):
             self.add(('j_thigh_left_z', 'j_thigh_right_z'),
                      0.0, 0.2, H + 0.7, i)
             self.add(('j_thigh_%s_x' % stance), 0.0, 0.2, H + 0.4, i)
-            # self.add(('j_thigh_%s_x' % stance), 0.0, 0.2, H + 0.0, i)
+            self.add(('j_thigh_%s_x' % stance), 0.0, 0.2, H + 0.0, i)
 
         self.logger.info('num params = %d' % self.num_params())
 

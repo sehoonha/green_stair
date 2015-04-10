@@ -38,7 +38,7 @@ class Simulation(object):
         # # Configure stair: disable the movement of the first step
         # self.stair = self.world.skels[1]
         # self.stair.set_mobile(False)
-        self.stair = SpringStair(self.world)
+        self.stair = SpringStair(self.world, self)
         logger.info('set step activation: %s' % step_activation)
         self.stair.set_activation(step_activation)
 
@@ -85,11 +85,11 @@ class Simulation(object):
         # self.reset_counter += 1
 
     def get_time(self):
-        return self.world.t + self.begin_time
+        return self.world.t + self.begin_time - 0.0
 
     def get_frame(self):
         begin_index = int(1000.0 * self.begin_time)
-        return self.world.frame + begin_index
+        return self.world.frame + begin_index - 0
 
     def step(self):
         self.stair.apply_force()
@@ -121,6 +121,7 @@ class Simulation(object):
     def render_target(self):
         # frame = min(self.world.frame, self.ref.num_frames - 1)
         frame = min(self.get_frame(), self.ref.num_frames - 1)
+        frame = max(frame, 0)
         self.render_target_at_frame(frame)
 
     def render_target_at_frame(self, frame):

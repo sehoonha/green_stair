@@ -3,9 +3,10 @@ import numpy as np
 
 
 class SpringStair(object):
-    def __init__(self, world):
+    def __init__(self, world, sim):
         self.logger = logging.getLogger(__name__)
         self.world = world
+        self.sim = sim
         self.step_duration = 0.8
 
         # Default stiffness
@@ -45,7 +46,8 @@ class SpringStair(object):
             skel.set_mobile(False)
 
     def activate(self):
-        t = self.world.t
+        # t = self.world.t
+        t = self.sim.get_time()
         for params in self.stairs:
             skel = params['skel']
             activation = params['activation']
