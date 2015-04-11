@@ -77,3 +77,7 @@ class SpringStair(object):
                 K *= 10
             f = -K * x - 0.5 * (K ** 0.5) * xdot
             skel.tau = np.array([f])
+
+    def step_height(self, step_index):
+        skel = self.stairs[step_index]['skel']
+        return skel.C[1] + 0.1

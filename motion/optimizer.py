@@ -35,11 +35,13 @@ class Optimizer(object):
 
         skel = self.sim.skel
         world = self.sim.world
+        stair = self.sim.stair
 
         # num_steps = self.step_index + 1 if self.step_index != -1 else 2
         # MAX_TIME = float(num_steps) * self.sim.stair.step_duration
         # MAX_TIME += 0.2
-        T = self.sim.stair.step_duration
+        T = stair.step_duration
+        RT = -0.1 if stair._activation is None else stair._activation
         num_steps = self.step_index + 1
         MAX_TIME = T
         # if self.step_index == 0:
@@ -76,7 +78,18 @@ class Optimizer(object):
                     print 'unbalanced', i, skel.C[i], Chat[i]
                     balanced = False
 
-            sim_step = int(world.t / self.sim.stair.step_duration) + 1
+            t = self.sim.get_time()
+            sim_step = int(t / self.sim.stair.step_duration) + 1
+            # Check early foot take-off
+            if world.t < RT + 0.01:
+                swing = 'left' if sim_step % 2 == 1 else 'right'
+                sw_foot = skel.body('h_heel_%s' % swing)
+                sw_foot_y = sw_foot.C[1] - 0.04
+                step_y = stair.step_height(self.step_index)
+                if math.fabs(sw_foot_y - step_y) > 0.05:
+                    print 'early take-off', swing, sw_foot_y, step_y
+                    balanced = False
+
             if sim_step % 2 == 1:
                 stance_foot = skel.body('h_toe_right').C
                 stance_foot_hat = self.motion.ref_rfoot_at_frame(frame)
@@ -93,17 +106,23 @@ class Optimizer(object):
         Chat_T = self.motion.ref_com_at_frame(final_frame_index)
         v_c = 1000.0 * norm(skel.C - Chat_T) ** 2
 
+        # Give more penalty to the head final frame
+        H = skel.body('h_head').C
+        Hhat_T = self.motion.ref_head_at_frame(final_frame_index)
+        w_hh = np.array([1.0, 1.0, 1.0])
+        v_hh = 1000.0 * norm((H - Hhat_T) * w_hh) ** 2
+
         # Final COMdot to the initial frame (continuous momentum)
         Cdothat_T = np.array(self.motion.ref_com_dot_at_frame(0))
         if num_steps == 1:
             Cdothat_T[0] *= 0.6
             Cdothat_T[2] *= -1
         elif num_steps == 2:
-            Cdothat_T[0] *= 0.8
+            Cdothat_T[0] *= 0.75
         elif num_steps == 3:
-            Cdothat_T[0] *= 0.8
+            Cdothat_T[0] *= 0.75
             Cdothat_T[2] *= -1
-        w_cd = np.array([15.0, 0.5, 10.0])
+        w_cd = np.array([20.0, 0.5, 10.0])
         v_cd = 10.0 * norm((skel.Cdot - Cdothat_T) * w_cd) ** 2
         self.logger.info('%s, %s --> %f' % (Cdothat_T, skel.Cdot, v_cd))
 
@@ -117,13 +136,13 @@ class Optimizer(object):
         w_f = np.array([1.0, 10.0, 1.0])
         v_f = 1000.0 * norm((swing_foot - swing_foot_hat) * w_f) ** 2
 
-        v = v_1 + v_2 + v_sk + v_c + v_cd + v_f
+        v = v_1 + v_2 + v_sk + v_hh + v_c + v_cd + v_f
         v = 10.0 * v + 500.0 * (MAX_TIME - world.t)
-        self.logger.info('%.6f (%.4f) <-- %.4f %.4f %.4f %.4f %.4f %.4f' %
-                         (v, world.t, v_1, v_2, v_sk, v_c, v_cd, v_f))
+        self.logger.info('%.6f (%.4f) <-- %.4f %.4f %.4f/%.4f %.4f %.4f/%.4f' %
+                         (v, world.t, v_1, v_2, v_sk, v_c, v_hh, v_cd, v_f))
 
         self.logger.info('%s' % repr(list(_x)))
-        self.logger.info('final %s' % repr(list(skel.x)))
+        # self.logger.info('final %s' % repr(list(skel.x)))
         self.logger.info('')
         if self.eval_counter % 48 == 0:
             for i in range(5):
@@ -140,11 +159,11 @@ class Optimizer(object):
         if step_index == 0:
             opts.set('ftarget', 150.0)
             opts.set('popsize', 48)
-            opts.set('maxiter', 150)
+            opts.set('maxiter', 200)
         else:
             opts.set('ftarget', 300.0)
             opts.set('popsize', 48)
-            opts.set('maxiter', 150)
+            opts.set('maxiter', 200)
 
         # dim = self.motion.num_params(self.step_index)
         # x0 = np.zeros(dim)

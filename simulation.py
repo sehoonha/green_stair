@@ -103,6 +103,10 @@ class Simulation(object):
         c.qdhat = self.motion.velocity_at_frame(i, isRef=True)
         # print i, self.skel.contacted_body_names()
 
+        # print self.world.t
+        # print self.skel.body('h_heel_left').C
+        # print [self.stair.step_height(j) for j in range(3)]
+
         self.world.step()
 
     def num_frames(self):

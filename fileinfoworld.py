@@ -99,7 +99,8 @@ class FileInfoWorld(object):
                 if j != 0:
                     continue
                 q_j[2] -= 5.0 * (3.1415 / 180.0)
-                q_j[3] += 0.06
+                # q_j[3] += 0.06
+                q_j[3] += 0.07
                 q_j[4] += 0.03
 
     def pose_at(self, frame_index, skel_id):
