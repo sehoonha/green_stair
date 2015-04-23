@@ -44,8 +44,8 @@ class Optimizer(object):
         RT = -0.1 if stair._activation is None else stair._activation
         num_steps = self.step_index + 1
         MAX_TIME = T
-        # if self.step_index == 0:
-        #     MAX_TIME += 0.2
+        if self.step_index == 0:
+            MAX_TIME += 0.0
         self.motion.set_params(_x, self.step_index)
         self.sim.begin_time = float(self.step_index) * T
         self.logger.info('begin_time = %f' % self.sim.begin_time)
@@ -133,7 +133,7 @@ class Optimizer(object):
         else:
             swing_foot = skel.body('h_toe_right').C
             swing_foot_hat = self.motion.ref_rfoot_at_frame(final_frame_index)
-        w_f = np.array([1.0, 10.0, 1.0])
+        w_f = np.array([10.0, 10.0, 1.0])
         v_f = 1000.0 * norm((swing_foot - swing_foot_hat) * w_f) ** 2
 
         v = v_1 + v_2 + v_sk + v_hh + v_c + v_cd + v_f

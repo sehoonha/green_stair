@@ -142,8 +142,22 @@ class RadialBasisMotion(ParameterizedMotion):
             b.set_params(params[lo:hi])
 
     def parameterized_pose_at_frame(self, frame_index):
-        q = self.pose_at_frame(frame_index, isRef=True)
-        t = float(frame_index) * self.h
-        for b in self.basis:
-            q += b.eval(t)
-        return q
+        stay = 0
+        if frame_index < stay:
+            t = float(frame_index) * self.h
+            q = self.pose_at_frame(0, isRef=True)
+            q = SkelVector(q, skel=self.skel)
+
+            b0 = RadialBasisDof(self.skel, 'j_heel_right_1',
+                                w0=-0.4, s0=0.1, t0=0.0)
+            for b in [b0]:
+                q += b.eval(t)
+
+            return q
+        else:
+            frame_index -= stay
+            q = self.pose_at_frame(frame_index, isRef=True)
+            t = float(frame_index) * self.h
+            for b in self.basis:
+                q += b.eval(t)
+            return q

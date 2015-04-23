@@ -144,7 +144,7 @@ class Simulation(object):
         self.skel.q = q
 
     def key_pressed(self, key):
-        # self.logger.info('key pressed: [%s]' % key)
+        self.logger.info('key pressed: [%s]' % key)
         if key == ']':
             print self.target_index
             self.target_index = (self.target_index + 10) % self.ref.num_frames
