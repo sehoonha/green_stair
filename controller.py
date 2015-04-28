@@ -17,10 +17,10 @@ class Controller:
         self.qdhat = np.zeros(ndofs)
         self.q_ref = np.zeros(ndofs)
         # self.Kp = np.diagflat([0.0] * 6 + [450.0] * (ndofs - 6))
-        # self.Kp = np.diagflat([0.0] * 6 + [520.0] * (ndofs - 6))
-        # self.Kd = np.diagflat([0.0] * 6 + [40.0] * (ndofs - 6))
-        self.Kp = np.diagflat([0.0] * 6 + [330.0] * (ndofs - 6))
-        self.Kd = np.diagflat([0.0] * 6 + [30.0] * (ndofs - 6))
+        self.Kp = np.diagflat([0.0] * 6 + [520.0] * (ndofs - 6))
+        self.Kd = np.diagflat([0.0] * 6 + [40.0] * (ndofs - 6))
+        # self.Kp = np.diagflat([0.0] * 6 + [330.0] * (ndofs - 6))
+        # self.Kd = np.diagflat([0.0] * 6 + [30.0] * (ndofs - 6))
 
         # for i in range(self.skel.ndofs):
         #     if 'right' in self.skel.dof(i).name:

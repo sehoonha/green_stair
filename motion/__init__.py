@@ -1,4 +1,5 @@
 from parameterized_motion import ParameterizedMotion
 from step_offset_motion import StepOffsetMotion
 from radial_basis_motion import RadialBasisMotion
+from nn_feedback_motion import NNFeedbackMotion
 from optimizer import Optimizer

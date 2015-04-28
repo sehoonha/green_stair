@@ -7,11 +7,23 @@ from window import Window
 import utils
 import sys
 
-# Configure a logger
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
 logfmt = '[%(levelname)s][%(asctime)s][%(module)s:%(lineno)d] %(message)s'
-logging.basicConfig(level=logging.DEBUG,
-                    format=logfmt,
-                    datefmt='%m/%d/%Y %I:%M:%S %p')
+formatter = logging.Formatter(logfmt)
+ch.setFormatter(formatter)
+root.addHandler(ch)
+
+
+# # Configure a logger
+# logfmt = '[%(levelname)s][%(asctime)s][%(module)s:%(lineno)d] %(message)s'
+# logging.basicConfig(level=logging.DEBUG,
+#                     format=logfmt,
+#                     datefmt='%m/%d/%Y %I:%M:%S %p')
+
 
 # Get a logger for this file
 logger = logging.getLogger(__name__)

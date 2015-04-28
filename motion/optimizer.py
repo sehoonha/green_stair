@@ -42,11 +42,14 @@ class Optimizer(object):
         # MAX_TIME += 0.2
         T = stair.step_duration
         RT = -0.1 if stair._activation is None else stair._activation
-        num_steps = self.step_index + 1
-        MAX_TIME = T
+        # num_steps = self.step_index + 1
+        # MAX_TIME = T * 2
+        num_steps = 2
+        MAX_TIME = T * num_steps
         if self.step_index == 0:
             MAX_TIME += 0.0
-        self.motion.set_params(_x, self.step_index)
+        # self.motion.set_params(_x, self.step_index)
+        self.motion.set_params(_x)
         self.sim.begin_time = float(self.step_index) * T
         self.logger.info('begin_time = %f' % self.sim.begin_time)
         self.sim.reset()
@@ -141,7 +144,7 @@ class Optimizer(object):
         self.logger.info('%.6f (%.4f) <-- %.4f %.4f %.4f/%.4f %.4f %.4f/%.4f' %
                          (v, world.t, v_1, v_2, v_sk, v_c, v_hh, v_cd, v_f))
 
-        self.logger.info('%s' % repr(list(_x)))
+        # self.logger.info('%s' % repr(list(_x)))
         # self.logger.info('final %s' % repr(list(skel.x)))
         self.logger.info('')
         if self.eval_counter % 48 == 0:
@@ -158,16 +161,17 @@ class Optimizer(object):
         opts.set('verb_disp', 1)
         if step_index == 0:
             opts.set('ftarget', 150.0)
-            opts.set('popsize', 48)
+            opts.set('popsize', 64)
             opts.set('maxiter', 200)
         else:
             opts.set('ftarget', 300.0)
-            opts.set('popsize', 48)
+            opts.set('popsize', 64)
             opts.set('maxiter', 200)
 
         # dim = self.motion.num_params(self.step_index)
         # x0 = np.zeros(dim)
-        x0 = self.motion.params_at_step(self.step_index)
+        # x0 = self.motion.params_at_step(self.step_index)
+        x0 = self.motion.params
         self.logger.info('')
         self.logger.info('')
         self.logger.info('------------------ CMA-ES ------------------')
@@ -179,7 +183,8 @@ class Optimizer(object):
         self.logger.info('value: %.6f' % res[1])
         self.logger.info('--------------------------------------------')
         self.logger.info('  set parameters for step = %d' % self.step_index)
-        self.motion.set_params(res[0], self.step_index)
+        self.motion.set_params(res[0])
+        # self.motion.set_params(res[0], self.step_index)
         self.logger.info('  final and set the new initial state')
         self.cost(res[0])
         self.init_state = self.final_state
@@ -194,7 +199,7 @@ class Optimizer(object):
 
     def solve(self):
         self.init_state = None
-        max_step = 3
+        max_step = 1
         answers = []
         for step in range(max_step):
             res = self.solve_step(step)

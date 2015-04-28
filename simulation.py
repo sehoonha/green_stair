@@ -5,7 +5,7 @@ from fileinfoworld import FileInfoWorld
 from controller import Controller
 import gltools
 from spring_stair import SpringStair
-from motion import StepOffsetMotion, RadialBasisMotion, Optimizer
+from motion import *
 from plotter_torque import PlotterTorque
 # from guppy import hpy
 
@@ -53,7 +53,8 @@ class Simulation(object):
 
         # Contruct the mutable motion
         # self.motion = StepOffsetMotion(self.skel, self.ref, self.stair)
-        self.motion = RadialBasisMotion(self.skel, self.ref, self.stair)
+        # self.motion = RadialBasisMotion(self.skel, self.ref, self.stair)
+        self.motion = NNFeedbackMotion(self.skel, self.ref, self.stair)
 
         # Create the controller
         self.skel.controller = Controller(self,
