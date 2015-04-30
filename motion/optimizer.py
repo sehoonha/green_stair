@@ -43,8 +43,8 @@ class Optimizer(object):
         T = stair.step_duration
         RT = -0.1 if stair._activation is None else stair._activation
         # num_steps = self.step_index + 1
-        # MAX_TIME = T * 2
         num_steps = 2
+        # MAX_TIME = T * 2
         MAX_TIME = T * num_steps
         if self.step_index == 0:
             MAX_TIME += 0.0
@@ -147,7 +147,7 @@ class Optimizer(object):
         # self.logger.info('%s' % repr(list(_x)))
         # self.logger.info('final %s' % repr(list(skel.x)))
         self.logger.info('')
-        if self.eval_counter % 48 == 0:
+        if self.eval_counter % self.popsize == 0:
             for i in range(5):
                 self.logger.info('    >==============<')
 
@@ -161,12 +161,13 @@ class Optimizer(object):
         opts.set('verb_disp', 1)
         if step_index == 0:
             opts.set('ftarget', 150.0)
-            opts.set('popsize', 64)
+            self.popsize = 64
             opts.set('maxiter', 200)
         else:
+            self.popsize = 64
             opts.set('ftarget', 300.0)
-            opts.set('popsize', 64)
             opts.set('maxiter', 200)
+        opts.set('popsize', self.popsize)
 
         # dim = self.motion.num_params(self.step_index)
         # x0 = np.zeros(dim)

@@ -60,7 +60,7 @@ class Simulation(object):
         self.skel.controller = Controller(self,
                                           self.skel,
                                           self.world.dt,
-                                          self.ref)
+                                          self.motion)
 
         # For check the target
         self.target_index = 0
@@ -80,6 +80,11 @@ class Simulation(object):
         q['j_heel_right_1'] += 0.05
         self.skel.q = q
         self.skel.qdot = self.motion.velocity_at_frame(0, isRef=True)
+
+        self.random_force = 400.0 * (np.random.rand(3) - 0.5)
+        self.random_force[1] = 0.0
+        self.random_force[2] *= 0.1
+        self.logger.info('force: %s' % self.random_force)
         # if self.reset_counter % 50 == 0:
         #     h = hpy()
         #     print h.heap()
@@ -97,6 +102,8 @@ class Simulation(object):
 
         # i = max(self.world.frame, -200)
         i = max(self.get_frame(), 0)
+        if 800 < self.get_frame() < 900:
+            self.skel.body('h_head').add_ext_force(self.random_force)
 
         c = self.skel.controller
         c.qhat = self.motion.pose_at_frame(i, isRef=False)
@@ -120,6 +127,10 @@ class Simulation(object):
         gltools.render_COM(self.skel)
         self.world.render()
         self.render_target()
+        if 800 < self.get_frame() < 900:
+            C = self.skel.body('h_head').C
+            f = self.random_force
+            gltools.render_line(C, C + 0.1 * f, (1, 0, 0))
         # self.evaluator.render()
         # self.planner.render()
 

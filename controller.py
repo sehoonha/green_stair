@@ -5,11 +5,11 @@ from jacobian_transpose import JTController
 
 class Controller:
     """ Add damping force to the skeleton """
-    def __init__(self, sim, skel, h, ref):
+    def __init__(self, sim, skel, h, motion):
         self.sim = sim
         self.h = h
         self.skel = skel
-        self.ref = ref
+        self.motion = motion
 
         # Spring-damper
         ndofs = self.skel.ndofs
@@ -69,11 +69,22 @@ class Controller:
         g = 9.81
         T = 0.8
         i = int(t / T)
+        phase_t = t % T
         swing = 'left' if i % 2 == 0 else 'right'
         stance = 'right' if i % 2 == 0 else 'left'
 
         tau += self.jt.apply('h_heel_%s' % stance, [0, -m * g, 0])
         tau += self.jt.apply('h_heel_%s' % swing, [0, 10.0 * g, 0])
+
+        if 0.6 < phase_t:
+            if swing == 'left':
+                Fhat = self.motion.ref_lfoot_at_frame((i + 1) * 800)
+            else:
+                Fhat = self.motion.ref_rfoot_at_frame((i + 1) * 800)
+            F = skel.body('h_toe_%s' % swing).C
+            force = -1000.0 * (F - Fhat)
+            # print t, phase_t, F, Fhat, force
+            tau += self.jt.apply('h_toe_%s' % swing, force)
 
         # if 0.3 < t and t < 0.40:
         #     tau += self.jt.apply('h_shin_left', [0, 500, 0])
