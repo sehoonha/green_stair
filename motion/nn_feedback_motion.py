@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+from math import fabs
 from parameterized_motion import ParameterizedMotion
 from pybrain.tools.shortcuts import buildNetwork
 from pydart import SkelVector
@@ -11,8 +12,9 @@ class NNFeedbackMotion(ParameterizedMotion):
         self.set_stair_info(stair)
         self.logger = logging.getLogger(__name__)
 
-        self.net_st = buildNetwork(7, 4, bias=True)
-        self.net_sw = buildNetwork(7, 3, bias=True)
+        self.net_st = buildNetwork(5, 4, bias=True)
+        self.net_sw = buildNetwork(5, 3, bias=True)
+        self.param_bal = np.array([1.0, 1.0, 1.0, 1.0])
 
         self.logger.info('dim = %d' % self.num_params())
         p0 = np.random.rand(self.num_params()) - 0.5
@@ -23,13 +25,20 @@ class NNFeedbackMotion(ParameterizedMotion):
         self.step_duration = stair.step_duration
 
     def num_params(self):
-        return len(self.net_st.params) + len(self.net_sw.params)
+        n0 = len(self.net_st.params)
+        n1 = len(self.net_sw.params)
+        n2 = len(self.param_bal)
+        return n0 + n1 + n2
 
     def set_params(self, params):
         self.params = params
         n0 = len(self.net_st.params)
+        n1 = len(self.net_sw.params)
+        n2 = len(self.param_bal)
+        assert(len(params) == n0 + n1 + n2)
         self.net_st._setParameters(params[:n0])
-        self.net_sw._setParameters(params[n0:])
+        self.net_sw._setParameters(params[n0:n0 + n1])
+        self.param_bal = params[n0 + n1:]
 
     def parameterized_pose_at_frame(self, frame_index):
         # Fetch time variables
@@ -57,11 +66,14 @@ class NNFeedbackMotion(ParameterizedMotion):
 
         SCALE = 0.3
         # Activate stance foot neural network
-        state_st = np.concatenate([[phase_t], 2.0 * (C - Chat), 0.5 * Cd])
-        state_st[3] *= flip
-        state_st[6] *= flip
-        state_st_lo = np.array([0.0, -0.5, -0.5, -0.5, -0.2, -0.2, -0.2])
-        state_st_hi = np.array([0.8, 0.5, 0.5, 0.5, 0.2, 0.2, 0.2])
+        XY = np.array([0, 1])
+        state_st = np.concatenate([[phase_t],
+                                   2.0 * (C - Chat)[XY],
+                                   0.5 * Cd[XY]])
+        # state_st[3] *= flip
+        # state_st[6] *= flip
+        state_st_lo = np.array([0.0, -0.5, -0.5, -0.2, -0.2])
+        state_st_hi = np.array([0.8, 0.5, 0.5, 0.2, 0.2])
         state_st_norm = (state_st - state_st_lo) / (state_st_hi - state_st_lo)
         # print state_st_norm
         feedback_st = self.net_st.activate(state_st_norm)
@@ -69,9 +81,11 @@ class NNFeedbackMotion(ParameterizedMotion):
         dStHeel2 *= flip
 
         # Activate swing foot neural network
-        state_sw = np.concatenate([[phase_t], 2.0 * (F - Fhat), 0.5 * Fd])
-        state_sw_lo = np.array([0.0, -0.5, -0.5, -0.5, -0.3, -0.3, -0.3])
-        state_sw_hi = np.array([0.8, 0.5, 0.5, 0.5, 0.3, 0.3, 0.3])
+        state_sw = np.concatenate([[phase_t],
+                                   2.0 * (F - Fhat)[XY],
+                                   0.5 * Fd[XY]])
+        state_sw_lo = np.array([0.0, -0.5, -0.5, -0.3, -0.3])
+        state_sw_hi = np.array([0.8, 0.5, 0.5, 0.3, 0.3])
         state_sw_norm = (state_sw - state_sw_lo) / (state_sw_hi - state_sw_lo)
         feedback_sw = self.net_sw.activate(state_sw_norm)
         (dSwHip, dSwKnee, dSwHeel) = SCALE * feedback_sw
@@ -79,18 +93,25 @@ class NNFeedbackMotion(ParameterizedMotion):
         # Modify the target pose
         q = self.pose_at_frame(frame_index, isRef=True)
         q = SkelVector(q, skel=self.skel)
-        q['j_thigh_%s_z' % swing] += dSwHip
-        q['j_shin_%s' % swing] += dSwKnee
-        q['j_heel_%s_1' % swing] += dSwHeel
+
         q['j_thigh_%s_z' % stance] += dStHip
         q['j_shin_%s' % stance] += dStKnee
         q['j_heel_%s_1' % stance] += dStHeel
         q['j_heel_%s_2' % stance] += dStHeel2
 
+        q['j_thigh_%s_z' % swing] += dSwHip
+        q['j_shin_%s' % swing] += dSwKnee
+        q['j_heel_%s_1' % swing] += dSwHeel
+
         # lateral = -0.2 * Cd[2]
-        lateral = 2.0 * (C[2] - Chat[2]) - 0.2 * Cd[2]
-        # print C[2], Chat[2], Cd[2], lateral
-        # q['j_thigh_%s_x' % stance] += 0.5
-        q['j_heel_%s_2' % stance] += 0.5 * lateral
+        kSbal = fabs(self.param_bal[0])
+        kDbal = fabs(self.param_bal[1])
+        lateral = kSbal * (C[2] - Chat[2]) - kDbal * Cd[2]
+        q['j_heel_%s_2' % stance] += lateral
+
+        kSbal = fabs(self.param_bal[2])
+        kDbal = fabs(self.param_bal[3])
+        lateral = kSbal * (C[2] - Chat[2]) - kDbal * Cd[2]
+        q['j_thigh_%s_x' % stance] += lateral
 
         return q

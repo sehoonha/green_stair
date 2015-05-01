@@ -81,9 +81,11 @@ class Simulation(object):
         self.skel.q = q
         self.skel.qdot = self.motion.velocity_at_frame(0, isRef=True)
 
-        self.random_force = 400.0 * (np.random.rand(3) - 0.5)
-        self.random_force[1] = 0.0
-        self.random_force[2] *= 0.1
+        # self.random_force = 400.0 * (np.random.rand(3) - 0.5)
+        # self.random_force[1] = 0.0
+        # self.random_force[2] *= 0.1
+        # self.random_force = np.array([200.0, 0.0, 0.0])
+        self.random_force = np.array([0.0, 0.0, 0.0])
         self.logger.info('force: %s' % self.random_force)
         # if self.reset_counter % 50 == 0:
         #     h = hpy()
