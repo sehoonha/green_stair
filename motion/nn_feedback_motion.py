@@ -106,6 +106,7 @@ class NNFeedbackMotion(ParameterizedMotion):
         # lateral = -0.2 * Cd[2]
         kSbal = fabs(self.param_bal[0])
         kDbal = fabs(self.param_bal[1])
+        # print kSbal, kDbal
         lateral = kSbal * (C[2] - Chat[2]) - kDbal * Cd[2]
         q['j_heel_%s_2' % stance] += lateral
 

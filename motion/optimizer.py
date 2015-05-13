@@ -28,7 +28,16 @@ class Optimizer(object):
         self.logger.info('thread started')
 
     def cost(self, _x):
+        if self.to_be_killed:
+            return 10e8
         self.eval_counter += 1
+        v0 = self.cost_case(_x, np.array([0.0, 0.0, 0.0]))
+        v1 = self.cost_case(_x, np.array([200.0, 0.0, 0.0]))
+        v = 0.5 * (v0 + v1)
+        self.logger.info(' *** total_cost %f (%f, %f) **' % (v, v0, v1))
+        return v
+
+    def cost_case(self, _x, _f):
         if self.to_be_killed:
             return 10e8
         self.logger.info('eval #%d' % self.eval_counter)
@@ -36,6 +45,7 @@ class Optimizer(object):
         skel = self.sim.skel
         world = self.sim.world
         stair = self.sim.stair
+        self.sim.random_force = _f
 
         # num_steps = self.step_index + 1 if self.step_index != -1 else 2
         # MAX_TIME = float(num_steps) * self.sim.stair.step_duration

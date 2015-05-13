@@ -66,6 +66,7 @@ class Simulation(object):
         self.target_index = 0
 
         # Reset the scene
+        self.random_force = np.array([0.0, 0.0, 0.0])
         self.reset_counter = 0
         self.reset()
         self.begin_time = 0.0
@@ -85,7 +86,7 @@ class Simulation(object):
         # self.random_force[1] = 0.0
         # self.random_force[2] *= 0.1
         # self.random_force = np.array([200.0, 0.0, 0.0])
-        self.random_force = np.array([0.0, 0.0, 0.0])
+        # self.random_force = np.array([0.0, 0.0, 0.0])
         self.logger.info('force: %s' % self.random_force)
         # if self.reset_counter % 50 == 0:
         #     h = hpy()

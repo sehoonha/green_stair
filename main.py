@@ -7,8 +7,11 @@ from window import Window
 import utils
 import sys
 
+# from logging_tree import printout  # pip install logging_tree
+# printout()
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)
+root.handlers = []
 
 ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
@@ -23,7 +26,9 @@ root.addHandler(ch)
 # logging.basicConfig(level=logging.DEBUG,
 #                     format=logfmt,
 #                     datefmt='%m/%d/%Y %I:%M:%S %p')
-
+# printout()
+# logging.error('test1-2-3')
+# exit(0)
 
 # Get a logger for this file
 logger = logging.getLogger(__name__)
