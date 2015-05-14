@@ -33,20 +33,25 @@ class Optimizer(object):
         self.eval_counter += 1
 
         self.logger.info(' *** start to evaluate a new parameter ***')
-        test_cases = [1.0, 0.2, 0.1]
+        test_cases = [1.0, 0.2]
         values = []
         for activation in test_cases:
             v = self.cost_case(_x, activation)
             values.append(v)
-            if v > 10000.0:
-                break
-        n = len(test_cases)
-        m = len(values)
-        v = np.sum(values) + (n - m) * 1.1 * np.max(values)
+            # if v > 10000.0:
+            #     break
+        # n = len(test_cases)
+        # m = len(values)
+        # penalty = 2.0 * np.max(values) + 100000.0
+        # v = np.sum(values) + (n - m) * penalty
+        v = np.max(values)
 
-        self.logger.info('   %d cases are evaluated' % m)
+        # self.logger.info('   %d cases are evaluated' % m)
         self.logger.info(' *** total_cost %f (%s) ***' % (v, values))
         self.logger.info('\n\n')
+        if self.eval_counter % self.popsize == 0:
+            for i in range(5):
+                self.logger.info('    >==============<')
         return v
 
     def cost_case(self, _x, _activation):
@@ -172,9 +177,6 @@ class Optimizer(object):
         # self.logger.info('%s' % repr(list(_x)))
         # self.logger.info('final %s' % repr(list(skel.x)))
         self.logger.info('')
-        if self.eval_counter % self.popsize == 0:
-            for i in range(5):
-                self.logger.info('    >==============<')
 
         return v
 
@@ -186,12 +188,12 @@ class Optimizer(object):
         opts.set('verb_disp', 1)
         if step_index == 0:
             opts.set('ftarget', 150.0)
-            self.popsize = 64
-            opts.set('maxiter', 200)
+            self.popsize = 16
+            opts.set('maxiter', 300)
         else:
-            self.popsize = 64
+            self.popsize = 8
             opts.set('ftarget', 300.0)
-            opts.set('maxiter', 200)
+            opts.set('maxiter', 300)
         opts.set('popsize', self.popsize)
 
         # dim = self.motion.num_params(self.step_index)

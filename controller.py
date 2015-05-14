@@ -85,11 +85,12 @@ class Controller:
         #     tau += self.jt.apply('h_toe_right', [0, -f, 0])
 
         tau += self.jt.apply('h_heel_%s' % stance, [0, -m * g, 0])
-        tau += self.jt.apply('h_heel_%s' % swing, [0, 10.0 * g, 0])
+        tau += self.jt.apply('h_heel_%s' % swing, [0, 5.0 * g, 0])
+        tau += self.jt.apply('h_toe_%s' % swing, [0, 5.0 * g, 0])
 
         # Locate a swing foot step
         if 0.0 < phase_t:
-            Foffset = np.array([0.0, 0.0, -0.08])
+            Foffset = np.array([0.0, 0.0, -0.02])
             if swing == 'left':
                 Fhat = self.motion.ref_lfoot_at_frame((i + 1) * 800)
                 Fhat = np.array(Fhat) + Foffset
