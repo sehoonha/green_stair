@@ -21,12 +21,17 @@ class Window(PyDartQtWindow):
 
     def initToolbar(self):
         self.timeText = QtGui.QLabel('Time: 0.0000', self)
+        self.actSpin = QtGui.QDoubleSpinBox(self)
+        self.actSpin.setValue(1.0)
+        self.actSpin.setSingleStep(0.1)
+        self.actSpin.valueChanged.connect(self.actSpinChangedEvent)
         self.prefix = QtGui.QLineEdit('', self)
         self.postfix = QtGui.QLineEdit('', self)
         # Update self.toolbar_actions
         # "list[x:x] += list2" is Python idiom for add list to the another list
 
         my_toolbar_actions = [self.printAction, self.timeText, None,
+                              self.actSpin, None,
                               self.optAction, self.killAction,
                               self.plotAction, None]
         self.toolbar_actions[4:4] += my_toolbar_actions
@@ -64,6 +69,11 @@ class Window(PyDartQtWindow):
 
         self.sim.motion.save(filename)
         self.logger.info('save file: ' + filename)
+
+    def actSpinChangedEvent(self):
+        v = self.actSpin.value()
+        self.logger.info('actSpinChangedEvent: %f' % v)
+        self.sim.stair.set_activation(v)
 
     def printEvent(self):
         print('print event')

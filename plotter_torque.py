@@ -18,13 +18,13 @@ class PlotterTorque(object):
 
     def plot(self, con, title):
         self.plot_torque(con, title)
-        self.plot_joint_angle(con, title, 'joint_hips',
-                              ['j_thigh_left_z', 'j_thigh_right_z'])
-        self.plot_joint_angle(con, title, 'joint_knees',
-                              ['j_shin_left', 'j_shin_right'])
-        self.plot_joint_angle(con, title, 'joint_heels',
-                              ['j_heel_left_1', 'j_heel_right_1'])
-        self.plot_toe_off(con, title)
+        # self.plot_joint_angle(con, title, 'joint_hips',
+        #                       ['j_thigh_left_z', 'j_thigh_right_z'])
+        # self.plot_joint_angle(con, title, 'joint_knees',
+        #                       ['j_shin_left', 'j_shin_right'])
+        # self.plot_joint_angle(con, title, 'joint_heels',
+        #                       ['j_heel_left_1', 'j_heel_right_1'])
+        # self.plot_toe_off(con, title)
 
     def plot_torque(self, con, title):
         plt.ioff()
@@ -42,8 +42,8 @@ class PlotterTorque(object):
             torques = con.history['tau']
             x = [float(i) / 1000.0 for i in range(len(torques))]
             y = [(tau[j_index]) for tau in torques]
-            # y2 = [(qdot[j_index] * tau[j_index])
-            #       for qdot, tau in zip(velocities, torques)]
+            # y = [(qdot[j_index] * tau[j_index])
+            #      for qdot, tau in zip(velocities, torques)]
             color = colors[j]
             p = plt.plot(x, y, color=color, linewidth=2)
             pp.append(p[0])
@@ -56,7 +56,8 @@ class PlotterTorque(object):
         t.set_y(0.92)
         font = {'size': 28}
         plt.xlabel('Time', fontdict=font)
-        plt.ylabel('Torques and powers', fontdict=font)
+        # plt.ylabel('Torques and powers', fontdict=font)
+        plt.ylabel('Torques', fontdict=font)
         # plt.legend(pp, self.data.keys(), numpoints=1, fontsize=20)
         # plt.legend(pp, legends, numpoints=1, fontsize=26,
         plt.axes().set_xlim(0.0, 2.4)  # Walking
@@ -67,7 +68,8 @@ class PlotterTorque(object):
                    # bbox_to_anchor=(0.15, 0.15))
                    # loc='lower left')
                    loc='upper right')
-        plt.savefig(self.to_full('torque'), bbox_inches='tight')
+        # plt.savefig(self.to_full('torque'), bbox_inches='tight')
+        plt.savefig(self.to_full(title), bbox_inches='tight')
         plt.close(fig)
 
     def plot_joint_angle(self, con, title, filename, joints):

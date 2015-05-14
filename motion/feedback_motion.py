@@ -19,7 +19,7 @@ class FeedbackMotion(ParameterizedMotion):
         self.step_duration = stair.step_duration
 
     def num_params(self):
-        return 6
+        return 8
 
     def set_params(self, params):
         self.params = params
@@ -69,13 +69,13 @@ class FeedbackMotion(ParameterizedMotion):
         q['j_thigh_%s_z' % stance] += st_thigh_offset
 
         # Adjust the stance thigh w.r.t. forward momentum
-        # (a, b) = (i.next(), i.next())
         CdZ = Cd[2] * flip
-        print phase_t, CdZ
-        if CdZ < -0.25:
-            st_heel2_offset = 0.0 - 0.1 * (CdZ + 0.35)
+        # print phase_t, CdZ
+        if CdZ < -0.20:
+            (a, b) = (i.next(), i.next())
+            st_heel2_offset = a - b * (CdZ + 0.20)
             st_heel2_offset *= flip
-            print phase_t, CdZ, st_heel2_offset
+            # print phase_t, CdZ, st_heel2_offset
             # st_heel2_offset = 0.5
             q['j_heel_%s_2' % stance] -= st_heel2_offset
 

@@ -24,7 +24,7 @@ class Simulation(object):
         # if step_activation is None:
         #     skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
         # else:
-        step_activation = 0.2
+        step_activation = 1.0
         skel_filename = 'data/skel/fullbody_springStair.skel'
         self.world = pydart.create_world(1.0 / 1000.0, skel_filename)
         logger.info('pydart create_world OK: dt = %f' % self.world.dt)
@@ -182,7 +182,7 @@ class Simulation(object):
         if self.stair.num_steps() == 0:
             title = 'Normal Stair'
         else:
-            title = 'Stair(%.3f)' % self.stair._activation
+            title = 'Stair_%.3f' % self.stair._activation
         if not full:
             return title
         if len(self.prefix) > 0:
