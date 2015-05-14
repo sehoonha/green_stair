@@ -21,10 +21,11 @@ class Simulation(object):
         logger.info('pydart initialization OK')
 
         # Create world
-        if step_activation is None:
-            skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
-        else:
-            skel_filename = 'data/skel/fullbody_springStair.skel'
+        # if step_activation is None:
+        #     skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
+        # else:
+        step_activation = 1.0
+        skel_filename = 'data/skel/fullbody_springStair.skel'
         self.world = pydart.create_world(1.0 / 1000.0, skel_filename)
         logger.info('pydart create_world OK: dt = %f' % self.world.dt)
 

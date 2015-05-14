@@ -31,27 +31,42 @@ class Optimizer(object):
         if self.to_be_killed:
             return 10e8
         self.eval_counter += 1
-        v0 = self.cost_case(_x, np.array([0.0, 0.0, 0.0]))
-        v1 = self.cost_case(_x, np.array([200.0, 0.0, 0.0]))
-        v = 0.5 * (v0 + v1)
-        self.logger.info(' *** total_cost %f (%f, %f) **' % (v, v0, v1))
+
+        self.logger.info(' *** start to evaluate a new parameter ***')
+        test_cases = [1.0, 0.2, 0.1]
+        values = []
+        for activation in test_cases:
+            v = self.cost_case(_x, activation)
+            values.append(v)
+            if v > 10000.0:
+                break
+        n = len(test_cases)
+        m = len(values)
+        v = np.sum(values) + (n - m) * 1.1 * np.max(values)
+
+        self.logger.info('   %d cases are evaluated' % m)
+        self.logger.info(' *** total_cost %f (%s) ***' % (v, values))
+        self.logger.info('\n\n')
         return v
 
-    def cost_case(self, _x, _f):
+    def cost_case(self, _x, _activation):
         if self.to_be_killed:
             return 10e8
-        self.logger.info('eval #%d' % self.eval_counter)
 
+        self.logger.info('eval #%d (acti: %f)' % (self.eval_counter,
+                                                  _activation))
         skel = self.sim.skel
         world = self.sim.world
         stair = self.sim.stair
-        self.sim.random_force = _f
+        stair.set_activation(_activation)
+
+        # self.sim.random_force = _f
 
         # num_steps = self.step_index + 1 if self.step_index != -1 else 2
         # MAX_TIME = float(num_steps) * self.sim.stair.step_duration
         # MAX_TIME += 0.2
         T = stair.step_duration
-        RT = -0.1 if stair._activation is None else stair._activation
+        # RT = -0.1 if stair._activation is None else stair._activation
         # num_steps = self.step_index + 1
         num_steps = 2
         # MAX_TIME = T * 2
@@ -93,15 +108,15 @@ class Optimizer(object):
 
             t = self.sim.get_time()
             sim_step = int(t / self.sim.stair.step_duration) + 1
-            # Check early foot take-off
-            if world.t < RT + 0.01:
-                swing = 'left' if sim_step % 2 == 1 else 'right'
-                sw_foot = skel.body('h_heel_%s' % swing)
-                sw_foot_y = sw_foot.C[1] - 0.04
-                step_y = stair.step_height(self.step_index)
-                if math.fabs(sw_foot_y - step_y) > 0.05:
-                    print 'early take-off', swing, sw_foot_y, step_y
-                    balanced = False
+            # # Check early foot take-off
+            # if world.t < RT + 0.01:
+            #     swing = 'left' if sim_step % 2 == 1 else 'right'
+            #     sw_foot = skel.body('h_heel_%s' % swing)
+            #     sw_foot_y = sw_foot.C[1] - 0.04
+            #     step_y = stair.step_height(self.step_index)
+            #     if math.fabs(sw_foot_y - step_y) > 0.05:
+            #         print 'early take-off', swing, sw_foot_y, step_y
+            #         balanced = False
 
             if sim_step % 2 == 1:
                 stance_foot = skel.body('h_toe_right').C
@@ -187,6 +202,7 @@ class Optimizer(object):
         self.logger.info('')
         self.logger.info('------------------ CMA-ES ------------------')
         self.logger.info('  step_index = %d' % self.step_index)
+        # res = cma.fmin(self.cost, x0, 0.001, opts)
         res = cma.fmin(self.cost, x0, 0.2, opts)
         self.to_be_killed = False
         self.logger.info('--------------------------------------------')
