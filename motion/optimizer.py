@@ -33,7 +33,7 @@ class Optimizer(object):
         self.eval_counter += 1
 
         self.logger.info(' *** start to evaluate a new parameter ***')
-        test_cases = [1.0, 0.2]
+        test_cases = [1.0, 0.2, 0.0]
         values = []
         for activation in test_cases:
             v = self.cost_case(_x, activation)
