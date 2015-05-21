@@ -96,12 +96,12 @@
           <geometry>
             <box>
               <size>0.121895398198 0.060947699099 0.121895398198</size>
-              <frags>3 3 3</frags>
+              <frags>5 3 3 </frags>
             </box>
           </geometry>
-	  <kv>15000.0</kv>
-	  <ke>0.0</ke>
-	  <damp>50.0</damp>
+	  <kv>40000.0</kv>
+	  <ke>60000.0</ke>
+	  <damp>100.0</damp>
         </soft_shape>
         <!-- <visualization_shape> -->
         <!--   <transformation>0.0243790796396 -0.0243790796396 0.0 0.0 0.0 0.0</transformation> -->
@@ -133,12 +133,12 @@
           <geometry>
             <box>
               <size>0.112866109443 0.0564330547213 0.090292887554</size>
-              <frags>3 3 3</frags>
+              <frags>5 3 3 </frags>
             </box>
           </geometry>
-	  <kv>15000.0</kv>
-	  <ke>0.0</ke>
-	  <damp>50.0</damp>
+	  <kv>40000.0</kv>
+	  <ke>60000.0</ke>
+	  <damp>100.0</damp>
         </soft_shape>
         <!-- <visualization_shape> -->
         <!--   <transformation>0.056433055 -0.0225732218885 0.0 0.0 0.0 0.0</transformation> -->
@@ -221,12 +221,12 @@
           <geometry>
             <box>
               <size>0.121895398198 0.060947699099 0.121895398198</size>
-              <frags>3 3 3</frags>
+              <frags>5 3 3 </frags>
             </box>
           </geometry>
-	  <kv>15000.0</kv>
-	  <ke>0.0</ke>
-	  <damp>50.0</damp>
+	  <kv>40000.0</kv>
+	  <ke>60000.0</ke>
+	  <damp>100.0</damp>
         </soft_shape>
         <!-- <visualization_shape> -->
         <!--   <transformation>0.0243790796396 -0.0243790796396 0.0 0.0 0.0 0.0</transformation> -->
@@ -258,12 +258,12 @@
           <geometry>
             <box>
               <size>0.112866109443 0.0564330547213 0.090292887554</size>
-              <frags>3 3 3</frags>
+              <frags>5 3 3 </frags>
             </box>
           </geometry>
-	  <kv>15000.0</kv>
-	  <ke>0.0</ke>
-	  <damp>50.0</damp>
+	  <kv>40000.0</kv>
+	  <ke>60000.0</ke>
+	  <damp>100.0</damp>
         </soft_shape>
         <!-- <visualization_shape> -->
         <!--   <transformation>0.056433055 -0.0225732218885 0.0 0.0 0.0 0.0</transformation> -->

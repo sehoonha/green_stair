@@ -33,7 +33,8 @@ class Optimizer(object):
         self.eval_counter += 1
 
         self.logger.info(' *** start to evaluate a new parameter ***')
-        test_cases = [1.0, 0.2, 0.0]
+        # test_cases = [1.0, 0.2, 0.0]
+        test_cases = [0.0]
         values = []
         for activation in test_cases:
             v = self.cost_case(_x, activation)
@@ -73,7 +74,7 @@ class Optimizer(object):
         T = stair.step_duration
         # RT = -0.1 if stair._activation is None else stair._activation
         # num_steps = self.step_index + 1
-        num_steps = 2
+        num_steps = 3
         # MAX_TIME = T * 2
         MAX_TIME = T * num_steps
         if self.step_index == 0:

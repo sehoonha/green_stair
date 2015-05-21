@@ -48,9 +48,10 @@ class SpringStair(object):
     def activate(self):
         # t = self.world.t
         t = self.sim.get_time()
-        for params in self.stairs:
+        for i, params in enumerate(self.stairs):
             skel = params['skel']
             activation = params['activation']
+            # if not skel.is_mobile() and activation < t and i != 0:
             if not skel.is_mobile() and activation < t:
                 skel.set_mobile(True)
                 # self.logger.info('Activate %s at %f' % (params['name'], t))

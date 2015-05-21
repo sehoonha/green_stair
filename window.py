@@ -22,7 +22,7 @@ class Window(PyDartQtWindow):
     def initToolbar(self):
         self.timeText = QtGui.QLabel('Time: 0.0000', self)
         self.actSpin = QtGui.QDoubleSpinBox(self)
-        self.actSpin.setValue(1.0)
+        self.actSpin.setValue(self.sim.stair._activation)
         self.actSpin.setSingleStep(0.1)
         self.actSpin.valueChanged.connect(self.actSpinChangedEvent)
         self.prefix = QtGui.QLineEdit('', self)

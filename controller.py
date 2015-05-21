@@ -23,12 +23,6 @@ class Controller:
                               [300.0] * (ndofs - 12))
         self.Kd = np.diagflat([0.0] * 6 + [30.0] * (ndofs - 6))
 
-        # for i in range(self.skel.ndofs):
-        #     if 'right' in self.skel.dof(i).name:
-        #         self.Kp[i, i] *= 1.3
-        #         self.Kd[i, i] *= 1.1
-        # print self.Kp
-
         # Jacobian transpose
         self.jt = JTController(self.skel)
         self.reset()
@@ -99,7 +93,8 @@ class Controller:
                 Fhat = np.array(Fhat) - Foffset
             F = skel.body('h_toe_%s' % swing).C
             dF = skel.body('h_toe_%s' % swing).Cdot
-            force = -2000.0 * (F - Fhat) - 20.0 * dF
+            # force = -2000.0 * (F - Fhat) - 20.0 * dF
+            force = -800.0 * (F - Fhat) - 20.0 * dF
             if phase_t < 0.6:
                 force[0] = 0.0
                 force[1] = 0.0

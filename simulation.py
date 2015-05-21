@@ -24,7 +24,7 @@ class Simulation(object):
         # if step_activation is None:
         #     skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
         # else:
-        step_activation = 1.0
+        step_activation = 0.0
         # skel_filename = 'data/skel/fullbody_springStair.skel'
         skel_filename = 'data/skel/soft_springStair.skel'
         self.world = pydart.create_world(1.0 / 1000.0, skel_filename)
@@ -132,7 +132,7 @@ class Simulation(object):
     def render(self):
         gltools.render_COM(self.skel)
         self.world.render()
-        self.render_target()
+        # self.render_target()
         if 800 < self.get_frame() < 900:
             C = self.skel.body('h_head').C
             f = self.random_force
