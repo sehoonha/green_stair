@@ -97,8 +97,35 @@ class FeedbackMotion(ParameterizedMotion):
         # print az
         q['j_heel_%s_2' % swing] += -5.0 * az
 
-        # if step_counter == 0:
-        #     q['j_heel_%s_2' % stance] -= 0.1
+        # Manual tune for soft walking
+        if step_counter == 0:
+            if phase_t < 0.6:
+                q['j_thigh_%s_z' % swing] += 0.2
+                q['j_heel_%s_1' % stance] += 0.05
+                q['j_heel_%s_2' % stance] += -0.05
+            else:
+                q['j_thigh_%s_z' % swing] -= 0.15
+                q['j_shin_%s' % swing] -= 0.2
+                q['j_heel_%s_2' % stance] += 0.4
+        if step_counter == 1:
+            if phase_t < 0.6:
+                q['j_thigh_%s_z' % swing] += 0.2
+                q['j_heel_%s_1' % stance] += 0.12
+                q['j_heel_%s_2' % stance] += 0.2
+                # q['j_abdomen_1'] -= 0.3
+            else:
+                q['j_thigh_%s_z' % swing] -= 0.1
+                q['j_shin_%s' % swing] -= 0.3
+                q['j_heel_%s_2' % stance] += -0.1
+        if step_counter == 2:
+            if phase_t < 0.6:
+                q['j_thigh_%s_z' % swing] += 0.0
+                q['j_heel_%s_1' % stance] += -0.05
+                q['j_heel_%s_2' % stance] += -0.4
+                # q['j_abdomen_1'] -= 0.3
+            else:
+                q['j_thigh_%s_z' % swing] += 0.0
+                q['j_shin_%s' % swing] -= 0.1
 
         if step_counter == 0:
             # Balance for stair push

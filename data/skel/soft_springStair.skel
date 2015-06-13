@@ -96,11 +96,11 @@
           <geometry>
             <box>
               <size>0.121895398198 0.060947699099 0.121895398198</size>
-              <frags>5 3 3 </frags>
+              <frags>3 3 3 </frags>
             </box>
           </geometry>
-	  <kv>40000.0</kv>
-	  <ke>60000.0</ke>
+	  <kv>80000.0</kv>
+	  <ke>120000.0</ke>
 	  <damp>100.0</damp>
         </soft_shape>
         <!-- <visualization_shape> -->
@@ -133,11 +133,11 @@
           <geometry>
             <box>
               <size>0.112866109443 0.0564330547213 0.090292887554</size>
-              <frags>5 3 3 </frags>
+              <frags>3 3 3 </frags>
             </box>
           </geometry>
-	  <kv>40000.0</kv>
-	  <ke>60000.0</ke>
+	  <kv>80000.0</kv>
+	  <ke>120000.0</ke>
 	  <damp>100.0</damp>
         </soft_shape>
         <!-- <visualization_shape> -->
@@ -221,11 +221,11 @@
           <geometry>
             <box>
               <size>0.121895398198 0.060947699099 0.121895398198</size>
-              <frags>5 3 3 </frags>
+              <frags>3 3 3 </frags>
             </box>
           </geometry>
-	  <kv>40000.0</kv>
-	  <ke>60000.0</ke>
+	  <kv>80000.0</kv>
+	  <ke>120000.0</ke>
 	  <damp>100.0</damp>
         </soft_shape>
         <!-- <visualization_shape> -->
@@ -258,11 +258,11 @@
           <geometry>
             <box>
               <size>0.112866109443 0.0564330547213 0.090292887554</size>
-              <frags>5 3 3 </frags>
+              <frags>3 3 3 </frags>
             </box>
           </geometry>
-	  <kv>40000.0</kv>
-	  <ke>60000.0</ke>
+	  <kv>80000.0</kv>
+	  <ke>120000.0</ke>
 	  <damp>100.0</damp>
         </soft_shape>
         <!-- <visualization_shape> -->
