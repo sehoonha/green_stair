@@ -3,4 +3,5 @@ from step_offset_motion import StepOffsetMotion
 from radial_basis_motion import RadialBasisMotion
 from nn_feedback_motion import NNFeedbackMotion
 from feedback_motion import FeedbackMotion
+from single_pose_motion import SinglePoseMotion
 from optimizer import Optimizer

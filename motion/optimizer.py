@@ -32,6 +32,9 @@ class Optimizer(object):
             return 10e8
         self.eval_counter += 1
 
+        # For 0.0 case test
+        return self.cost_balance(_x)
+
         self.logger.info(' *** start to evaluate a new parameter ***')
         # test_cases = [1.0, 0.2, 0.0]
         test_cases = [0.0]
@@ -181,6 +184,45 @@ class Optimizer(object):
 
         return v
 
+    def cost_balance(self, _x):
+        skel = self.sim.skel
+        world = self.sim.world
+        # stair = self.sim.stair
+        self.motion.set_params(_x)
+        self.sim.reset()
+        if self.init_state is not None:
+            world.x = self.init_state
+
+        C0 = skel.C + np.array([0.0, 0.2, 0.0])
+        FL0 = skel.body('h_toe_left').C
+        FR0 = skel.body('h_toe_right').C
+
+        v_dev = norm(self.motion.delta())
+        v_bal = 0.0
+        v_foot_l = 0.0
+        v_foot_r = 0.0
+
+        while world.t < 0.3:
+            self.sim.step()
+            # Calculate balance
+            C = skel.C
+            v_bal = norm((C - C0) * np.array([1.0, 0.5, 10.0]))
+            # Left and right foot
+            v_foot_l = norm(FL0 - skel.body('h_toe_left').C)
+            v_foot_r = norm(FR0 - skel.body('h_toe_right').C)
+
+        self.final_state = world.x
+
+        v_cdot_z = 20.0 * 0.5 * (skel.Cdot[2] ** 2)
+
+        v = v_bal + v_foot_l + v_foot_r + v_dev + v_cdot_z
+        self.logger.info('eval #%d' % (self.eval_counter))
+        self.logger.info('%.6f (%.4f) %.4f %.4f %.4f %.4f / %.4f' %
+                         (v, world.t, v_bal, v_foot_l, v_foot_r, v_dev,
+                          v_cdot_z))
+
+        return v * 10000.0
+
     def solve_step(self, step_index):
         self.to_be_killed = False
         self.eval_counter = 0
@@ -189,10 +231,10 @@ class Optimizer(object):
         opts.set('verb_disp', 1)
         if step_index == 0:
             opts.set('ftarget', 150.0)
-            self.popsize = 16
+            self.popsize = 32
             opts.set('maxiter', 300)
         else:
-            self.popsize = 8
+            self.popsize = 32
             opts.set('ftarget', 300.0)
             opts.set('maxiter', 300)
         opts.set('popsize', self.popsize)

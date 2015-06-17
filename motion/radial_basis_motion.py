@@ -87,7 +87,9 @@ class RadialBasisMotion(ParameterizedMotion):
 
         self.logger.info('num params = %d' % self.num_params())
 
+        self.logger.info('dim = %d' % self.num_params())
         x0 = np.zeros(self.num_params())
+        # x0 = np.random.rand(self.num_params())
         self.params = x0
         self.set_params(x0)
 

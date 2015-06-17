@@ -24,9 +24,9 @@ class Simulation(object):
         # if step_activation is None:
         #     skel_filename = 'data/skel/fullbody_baselineStairs2.skel'
         # else:
-        step_activation = 1.0
-        # skel_filename = 'data/skel/fullbody_springStair.skel'
-        skel_filename = 'data/skel/soft_springStair.skel'
+        step_activation = 0.0
+        skel_filename = 'data/skel/fullbody_springStair.skel'
+        # skel_filename = 'data/skel/soft_springStair.skel'
         self.world = pydart.create_world(1.0 / 1000.0, skel_filename)
         logger.info('pydart create_world OK: dt = %f' % self.world.dt)
 
@@ -57,7 +57,8 @@ class Simulation(object):
         # self.motion = StepOffsetMotion(self.skel, self.ref, self.stair)
         # self.motion = RadialBasisMotion(self.skel, self.ref, self.stair)
         # self.motion = NNFeedbackMotion(self.skel, self.ref, self.stair)
-        self.motion = FeedbackMotion(self.skel, self.ref, self.stair)
+        # self.motion = FeedbackMotion(self.skel, self.ref, self.stair)
+        self.motion = SinglePoseMotion(self.skel, self.ref, self.stair)
 
         # Create the controller
         self.skel.controller = Controller(self,
