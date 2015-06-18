@@ -58,7 +58,9 @@ class Simulation(object):
         # self.motion = RadialBasisMotion(self.skel, self.ref, self.stair)
         # self.motion = NNFeedbackMotion(self.skel, self.ref, self.stair)
         # self.motion = FeedbackMotion(self.skel, self.ref, self.stair)
-        self.motion = SinglePoseMotion(self.skel, self.ref, self.stair)
+        # self.motion = SinglePoseMotion(self.skel, self.ref, self.stair)
+        self.motion = WindowedMotion(self.skel, self.ref, self.stair)
+        self.motion.sim = self
 
         # Create the controller
         self.skel.controller = Controller(self,
@@ -91,7 +93,7 @@ class Simulation(object):
         # self.random_force[2] *= 0.1
         # self.random_force = np.array([200.0, 0.0, 0.0])
         # self.random_force = np.array([0.0, 0.0, 0.0])
-        self.logger.info('force: %s' % self.random_force)
+        # self.logger.info('force: %s' % self.random_force)
         # if self.reset_counter % 50 == 0:
         #     h = hpy()
         #     print h.heap()
@@ -109,8 +111,8 @@ class Simulation(object):
 
         # i = max(self.world.frame, -200)
         i = max(self.get_frame(), 0)
-        if 800 < self.get_frame() < 900:
-            self.skel.body('h_head').add_ext_force(self.random_force)
+        # if 800 < self.get_frame() < 900:
+        #     self.skel.body('h_head').add_ext_force(self.random_force)
 
         c = self.skel.controller
         c.qhat = self.motion.pose_at_frame(i, isRef=False)
@@ -174,8 +176,9 @@ class Simulation(object):
             self.update_to_target()
 
     def optimize(self):
-        self.solver = Optimizer(self, self.motion)
-        self.solver.launch()
+        # self.solver = Optimizer(self, self.motion)
+        # self.solver.launch()
+        self.motion.launch(self)
 
     def kill_optimizer(self):
         self.solver.to_be_killed = True

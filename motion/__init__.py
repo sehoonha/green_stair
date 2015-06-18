@@ -4,4 +4,5 @@ from radial_basis_motion import RadialBasisMotion
 from nn_feedback_motion import NNFeedbackMotion
 from feedback_motion import FeedbackMotion
 from single_pose_motion import SinglePoseMotion
+from windowed_motion import WindowedMotion
 from optimizer import Optimizer
