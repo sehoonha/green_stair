@@ -66,19 +66,23 @@ class Window(object):
         opts = cma.CMAOptions()
         opts.set('verb_disp', 1)
         opts.set('ftarget', 1.0)
-        opts.set('popsize', 16)
-        opts.set('maxiter', 100)
+        opts.set('popsize', 32)
+        opts.set('maxiter', 200)
         self.opts = opts
         x0 = self.params
         self.logger.info('x0: %s' % x0)
         self.logger.info('------------------ CMA-ES ------------------')
-        res = cma.fmin(self.cost, x0, 0.2, opts)
-        self.logger.info('--------------------------------------------')
-        self.logger.info('solution: %s' % repr(res[0]))
-        self.logger.info('value: %.6f' % res[1])
-        self.logger.info('--------------------------------------------')
-        self.set_params(res[0])
-        self.cost(res[0], write_final=True)
+        if self.t0 < -0.399:
+            self.logger.info('skip the optimization')
+            self.logger.info('--------------------------------------------')
+        else:
+            res = cma.fmin(self.cost, x0, 0.2, opts)
+            self.logger.info('--------------------------------------------')
+            self.logger.info('solution: %s' % repr(res[0]))
+            self.logger.info('value: %.6f' % res[1])
+            self.logger.info('--------------------------------------------')
+            self.set_params(res[0])
+        self.cost(self.params, write_final=True)
 
     def index0(self):
         t = self.t0
@@ -115,8 +119,8 @@ class Window(object):
             q = skel.q
             qhat = self.motion.ref_pose_at_frame(frame)
             q_diff = q - qhat
-            q_diff[:6] = 0.0
-            v['q'] += (1.0 / (skel.ndofs - 6)) * 0.5 * norm(q_diff) ** 2
+            # q_diff[:6] = 0.0
+            v['q'] += (2.0 / (skel.ndofs)) * 0.5 * norm(q_diff) ** 2
 
             # Measure v['C']
             C = skel.C
@@ -127,16 +131,20 @@ class Window(object):
             v['Cd'] += 5.0 * 0.5 * (skel.Cdot[2] ** 2)
 
             # Measure v['FL']
-            w_fl = 100.0 if (0.6 <= t <= 1.6) else 1.0
+            w_fl = 100.0 if (0.6 <= t <= 1.6) else 2.0
             FL = skel.body('h_toe_left').C
             FLhat = self.motion.ref_lfoot_at_frame(frame)
             v['FL'] += w_fl * 0.5 * norm(FL - FLhat) ** 2
+            if (0.4 <= t <= 0.6) and FL[1] < FLhat[1]:
+                v['FL'] += 1.0
 
             # Measure v['FR']
-            w_fr = 100.0 if (0.0 <= t <= 0.8) or (1.4 <= t <= 2.4) else 1.0
+            w_fr = 100.0 if (0.0 <= t <= 0.8) or (1.4 <= t <= 2.4) else 2.0
             FR = skel.body('h_toe_right').C
             FRhat = self.motion.ref_rfoot_at_frame(frame)
             v['FR'] += w_fr * 0.5 * norm(FR - FRhat) ** 2
+            if (1.2 <= t <= 1.4) and FR[1] < FRhat[1]:
+                v['FR'] += 1.0
 
             # Measure v['H']
             H = skel.body('h_head').C
@@ -240,6 +248,17 @@ class WindowedMotion(ParameterizedMotion):
         self.reconstruct_params()
         self.logger.info('params: %s' % self.params)
 
+    def swing_thigh_offset(self, t):
+        step_duration = 0.8
+        phase_t = t % step_duration
+        ret = SkelVector(np.zeros(self.skel.ndofs), self.skel)
+        if not (0.1 <= phase_t <= 0.5):
+            return ret
+        step_counter = int(t / step_duration)
+        swing = 'left' if step_counter % 2 == 0 else 'right'
+        ret['j_thigh_%s_z' % swing] += 0.2
+        return ret
+
     def parameterized_pose_at_frame(self, frame_index):
         if self.current_win is None:
             t = float(frame_index) * self.h
@@ -247,16 +266,14 @@ class WindowedMotion(ParameterizedMotion):
             if win_index >= len(self.windows):
                 return self.pose_at_frame(frame_index, isRef=True)
             win = self.windows[win_index]
-            print self.sim.get_time(), frame_index, t, win.t0
+            # print self.sim.get_time(), frame_index, t, win.t0
             q0 = self.pose_at_frame(frame_index, isRef=True)
-            q = q0 + win.delta()
+            q = q0 + win.delta() + self.swing_thigh_offset(t)
             return q
         else:
             win = self.current_win
-            win_frame = frame_index
-            q0 = self.pose_at_frame(win_frame, isRef=True)
-            q = q0 + win.delta()
-
-            t = float(win_frame) * self.h
+            t = float(frame_index) * self.h
+            q0 = self.pose_at_frame(frame_index, isRef=True)
+            q = q0 + win.delta() + self.swing_thigh_offset(t)
             # print '>', self.sim.get_time(), win_frame, t, win.t0
             return q
