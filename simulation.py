@@ -59,7 +59,8 @@ class Simulation(object):
         # self.motion = NNFeedbackMotion(self.skel, self.ref, self.stair)
         # self.motion = FeedbackMotion(self.skel, self.ref, self.stair)
         # self.motion = SinglePoseMotion(self.skel, self.ref, self.stair)
-        self.motion = WindowedMotion(self.skel, self.ref, self.stair)
+        # self.motion = WindowedMotion(self.skel, self.ref, self.stair)
+        self.motion = GlobalWindowedMotion(self.skel, self.ref, self.stair)
         self.motion.sim = self
 
         # Create the controller

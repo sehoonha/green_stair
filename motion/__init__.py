@@ -5,4 +5,5 @@ from nn_feedback_motion import NNFeedbackMotion
 from feedback_motion import FeedbackMotion
 from single_pose_motion import SinglePoseMotion
 from windowed_motion import WindowedMotion
+from global_windowed_motion import GlobalWindowedMotion
 from optimizer import Optimizer

@@ -82,25 +82,25 @@ class Controller:
         tau += self.jt.apply('h_heel_%s' % swing, [0, 5.0 * g, 0])
         tau += self.jt.apply('h_toe_%s' % swing, [0, 5.0 * g, 0])
 
-        # Locate a swing foot step
-        if 0.0 < phase_t:
-            Foffset = np.array([0.0, 0.0, -0.02])
-            if swing == 'left':
-                Fhat = self.motion.ref_lfoot_at_frame((i + 1) * 800)
-                Fhat = np.array(Fhat) + Foffset
-            else:
-                Fhat = self.motion.ref_rfoot_at_frame((i + 1) * 800)
-                Fhat = np.array(Fhat) - Foffset
-            F = skel.body('h_toe_%s' % swing).C
-            dF = skel.body('h_toe_%s' % swing).Cdot
-            # force = -2000.0 * (F - Fhat) - 20.0 * dF
-            force = -800.0 * (F - Fhat) - 20.0 * dF
-            if phase_t < 0.6:
-                force[0] = 0.0
-                force[1] = 0.0
-            # print t, phase_t, F, Fhat, force
-            tau += self.jt.apply('h_toe_%s' % swing, force)
-            tau += self.jt.apply('h_heel_%s' % swing, force)
+        # # Locate a swing foot step
+        # if 0.0 < phase_t:
+        #     Foffset = np.array([0.0, 0.0, -0.02])
+        #     if swing == 'left':
+        #         Fhat = self.motion.ref_lfoot_at_frame((i + 1) * 800)
+        #         Fhat = np.array(Fhat) + Foffset
+        #     else:
+        #         Fhat = self.motion.ref_rfoot_at_frame((i + 1) * 800)
+        #         Fhat = np.array(Fhat) - Foffset
+        #     F = skel.body('h_toe_%s' % swing).C
+        #     dF = skel.body('h_toe_%s' % swing).Cdot
+        #     # force = -2000.0 * (F - Fhat) - 20.0 * dF
+        #     force = -800.0 * (F - Fhat) - 20.0 * dF
+        #     if phase_t < 0.6:
+        #         force[0] = 0.0
+        #         force[1] = 0.0
+        #     # print t, phase_t, F, Fhat, force
+        #     tau += self.jt.apply('h_toe_%s' % swing, force)
+        #     tau += self.jt.apply('h_heel_%s' % swing, force)
 
         # Locate a head
         if 0.0 < phase_t:
