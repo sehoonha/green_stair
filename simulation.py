@@ -175,6 +175,9 @@ class Simulation(object):
             print self.target_index
             self.target_index = (self.target_index - 10) % self.ref.num_frames
             self.update_to_target()
+        else:
+            if hasattr(self.motion, 'key_pressed'):
+                self.motion.key_pressed(key)
 
     def optimize(self):
         # self.solver = Optimizer(self, self.motion)

@@ -107,7 +107,9 @@ class Sample(object):
 
             # Measure v['qdot']
             qdot = skel.qdot
-            v['qdot'] += (0.02 / (skel.ndofs)) * 0.5 * norm(qdot) ** 2
+            qdot_hat = self.motion.velocity_at_frame(frame)
+            qdot_diff = qdot - qdot_hat
+            v['qdot'] += (0.02 / (skel.ndofs)) * 0.5 * norm(qdot_diff) ** 2
 
             # Measure v['C']
             C = skel.C
@@ -123,6 +125,7 @@ class Sample(object):
                 Cdhat[0] *= 0.9
             Cdiff = (Cd - Cdhat) * np.array([1.0, 0.3, 5.0])
             v['Cd'] += 3.0 * 0.5 * (norm(Cdiff) ** 2)
+            v['Cd'] += 3.0 * 0.5 * (Cd[1] ** 2)
 
             # Measure v['FL']
             w_fl = 100.0 if (0.6 <= t <= 1.6) else 2.0
@@ -141,6 +144,8 @@ class Sample(object):
             v['FR'] += w_fr * 0.5 * norm(FR - FRhat) ** 2
             if (1.2 <= t <= 1.4) and FR[1] < FRhat[1]:
                 v['FR'] += 1.0
+            # if (1.0 <= t <= 1.2) and (0.16 + 0.295) < FR[0]:
+            #     v['FR'] += 1.0
 
             # Measure v['H']
             H = skel.body('h_head').C
@@ -171,7 +176,7 @@ class GlobalWindowedMotion(ParameterizedMotion):
         self.set_stair_info(stair)
         self.logger = logging.getLogger(__name__)
         self.sequence = []
-        self.T = 0.8
+        self.T = 1.6
         self.dt = 0.2
         self.current_sample = None
 
@@ -220,24 +225,30 @@ class GlobalWindowedMotion(ParameterizedMotion):
         dt = self.dt
         prev_samples = [None]
         all_samples = list()
-        n_iter_samples = 1000
-        n_saved_samples = 100
+        n_iter_samples = 10000
+        n_saved_samples = 1000
         for t0 in np.arange(0.0, T, dt):
             next_samples = []
             if len(prev_samples) > 1:
                 prev_values = [100.0 / s.score for s in prev_samples]
-                sum_prev_values = sum(prev_values)
-                prev_values = np.array(prev_values) / sum_prev_values
+                prev_values = np.array(prev_values) / np.sum(prev_values)
+                prev_values = np.array(prev_values) / np.sum(prev_values)
+                prev_values = np.array(prev_values) / np.sum(prev_values)
             else:
                 prev_values = [1.0]
             # 1. Generate new samples
+            curr_min_score = 100000.0
             while len(next_samples) < n_iter_samples:
-                prev = np.random.choice(prev_samples, p=prev_values)
+                try:
+                    prev = np.random.choice(prev_samples, p=prev_values)
+                except:
+                    self.logger.error('Sum of prev_values = %.8f' %
+                                      np.sum(prev_values))
                 s = Sample(self, t0, dt, prev)
                 dim = s.num_params()
                 # params = 0.6 * (np.random.rand(dim) - 0.5)
                 m = np.zeros(dim)
-                C = 0.15 * np.identity(dim)
+                C = 0.10 * np.identity(dim)
                 params = np.random.multivariate_normal(m, C)
                 s.set_params(params)
                 next_samples.append(s)
@@ -248,6 +259,8 @@ class GlobalWindowedMotion(ParameterizedMotion):
                 self.logger.info('  params = %s' % s.params)
                 self.logger.info('  prev score = %f' % s.prev_score())
                 s.cost()
+                curr_min_score = min(curr_min_score, s.score)
+                self.logger.info('  curr_min_score = %f' % curr_min_score)
 
             # 2. Select the good and various samples
             all_samples.append(prev_samples)
@@ -298,11 +311,12 @@ class GlobalWindowedMotion(ParameterizedMotion):
         stance = 'right' if step_counter % 2 == 0 else 'left'
         ret['j_thigh_%s_z' % swing] += 0.2
         ret['j_thigh_%s_z' % stance] -= 0.2
-        ret['j_heel_%s_1' % stance] -= 0.2
+        ret['j_heel_%s_1' % stance] -= 0.3
         # print t, phase_t, ret
         return ret
 
     def parameterized_pose_at_frame(self, frame_index):
+        # print self.skel.body('h_toe_right').C
         if self.current_sample is None:
             # Fetch time information
             t = float(frame_index) * self.h
@@ -324,3 +338,6 @@ class GlobalWindowedMotion(ParameterizedMotion):
             q = q0 + s.delta() + self.swing_thigh_offset(t)
             # print '>', self.sim.get_time(), win_frame, t, win.t0
             return q
+
+    def key_pressed(self, k):
+        print 'key:', k

@@ -61,6 +61,14 @@ class Controller:
                     self.Kp[ii, ii] = 100.0
                 else:
                     self.Kp[ii, ii] = 300.0
+            if 'shin' in dof.name:
+                self.qhat[ii] = min(0.0, self.qhat[ii])
+                if skel.q[ii] > 0:
+                    self.Kp[ii, ii] = 1000.0
+                else:
+                    self.Kp[ii, ii] = 300.0
+
+                # print self.qhat[ii], skel.q[ii]
         # np.set_printoptions(threshold='nan')
 
         invM = inv(skel.M + self.Kd * self.h)
