@@ -60,7 +60,8 @@ class Simulation(object):
         # self.motion = FeedbackMotion(self.skel, self.ref, self.stair)
         # self.motion = SinglePoseMotion(self.skel, self.ref, self.stair)
         # self.motion = WindowedMotion(self.skel, self.ref, self.stair)
-        self.motion = GlobalWindowedMotion(self.skel, self.ref, self.stair)
+        # self.motion = GlobalWindowedMotion(self.skel, self.ref, self.stair)
+        self.motion = AdaptiveWindowedMotion(self.skel, self.ref, self.stair)
         self.motion.sim = self
 
         # Create the controller

@@ -87,6 +87,9 @@ class ParameterizedMotion(object):
         vel = (-0.5 * q0 + 0.5 * q2) / h
         return vel
 
+    def ref_velocity_at_frame(self, frame_index):
+        return self.velocity_at_frame(frame_index, True)
+
     def velocity_at_first_frame(self, isRef):
         """ Forward finite difference with 2 accuracy """
         h = self.h

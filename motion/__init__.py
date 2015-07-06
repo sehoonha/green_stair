@@ -6,4 +6,5 @@ from feedback_motion import FeedbackMotion
 from single_pose_motion import SinglePoseMotion
 from windowed_motion import WindowedMotion
 from global_windowed_motion import GlobalWindowedMotion
+from adaptive_windowed_motion import AdaptiveWindowedMotion
 from optimizer import Optimizer
