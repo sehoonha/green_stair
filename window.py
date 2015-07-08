@@ -15,6 +15,8 @@ class Window(PyDartQtWindow):
         self.saveAction = self.createAction('&Save', self.saveEvent)
         self.printAction = self.createAction('Print', self.printEvent)
 
+        self.refreshAction = self.createAction('Refresh', self.refreshEvent)
+
         self.optAction = self.createAction('Opt', self.optEvent)
         self.killAction = self.createAction('Kill', self.killEvent)
         self.plotAction = self.createAction('Plot', self.plotEvent)
@@ -29,9 +31,17 @@ class Window(PyDartQtWindow):
         self.postfix = QtGui.QLineEdit('', self)
         # Update self.toolbar_actions
         # "list[x:x] += list2" is Python idiom for add list to the another list
+        self.solXSpin = QtGui.QSpinBox(self)
+        self.solXSpin.setMaximum(0)
+        self.solXSpin.valueChanged.connect(self.solSpinChangedEvent)
+        self.solYSpin = QtGui.QSpinBox(self)
+        self.solYSpin.setMaximum(0)
+        self.solYSpin.valueChanged.connect(self.solSpinChangedEvent)
 
         my_toolbar_actions = [self.printAction, self.timeText, None,
                               self.actSpin, None,
+                              self.refreshAction,
+                              self.solXSpin, self.solYSpin, None,
                               self.optAction, self.killAction,
                               self.plotAction, None]
         self.toolbar_actions[4:4] += my_toolbar_actions
@@ -75,11 +85,23 @@ class Window(PyDartQtWindow):
         self.logger.info('actSpinChangedEvent: %f' % v)
         self.sim.stair.set_activation(v)
 
+    def refreshEvent(self):
+        max_x, max_y = self.sim.refresh_solutions()
+        self.solXSpin.setMaximum(max_x)
+        self.solYSpin.setMaximum(max_y)
+
+    def solSpinChangedEvent(self):
+        x = self.solXSpin.value()
+        y = self.solYSpin.value()
+        self.logger.info('solSpinChangedEvent: %d %d' % (x, y))
+        self.sim.change_solution(x, y)
+
     def printEvent(self):
         print('print event')
 
     def optEvent(self):
         self.sim.optimize()
+        self.refreshEvent()
 
     def killEvent(self):
         self.sim.kill_optimizer()

@@ -206,3 +206,12 @@ class Simulation(object):
         pl.prefix = self.prefix
         pl.postfix = self.postfix
         pl.plot(self.skel.controller, self.title(False))
+
+    def change_solution(self, x, y):
+        self.logger.info('change solution x, y = %d, %d' % (x, y))
+        self.motion.set_solution(x, y)
+
+    def refresh_solutions(self):
+        (nx, ny) = self.motion.num_solutions()
+        self.logger.info('nx, ny = %d, %d' % (nx, ny))
+        return (nx, ny)

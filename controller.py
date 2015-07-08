@@ -48,6 +48,7 @@ class Controller:
         g = 9.81
         T = 0.8
         t = self.sim.get_time()
+        frame_index = int(t / self.h)
         i = int(t / T)
         phase_t = t % T
         swing = 'left' if i % 2 == 0 else 'right'
@@ -74,7 +75,10 @@ class Controller:
         invM = inv(skel.M + self.Kd * self.h)
         p = -self.Kp.dot(skel.q + skel.qdot * self.h - self.qhat)
         d = -self.Kd.dot(skel.qdot - self.qdhat)
-        qddot = invM.dot(-skel.c + p + d + skel.constraint_forces())
+        cnstr = skel.constraint_forces()
+        if frame_index % 200 == 0:
+            cnstr[:] = 0.0
+        qddot = invM.dot(-skel.c + p + d + cnstr)
         tau = p + d - self.Kd.dot(qddot) * self.h
 
         # t = self.skel.world.t
@@ -86,9 +90,9 @@ class Controller:
         #     f = (Cy_hat - Cy) * 1000.0 - Cy_dot * 200.0
         #     tau += self.jt.apply('h_toe_right', [0, -f, 0])
 
-        tau += self.jt.apply('h_heel_%s' % stance, [0, -m * g, 0])
-        tau += self.jt.apply('h_heel_%s' % swing, [0, 5.0 * g, 0])
-        tau += self.jt.apply('h_toe_%s' % swing, [0, 5.0 * g, 0])
+        tau_vf = self.jt.apply('h_heel_%s' % stance, [0, -m * g, 0])
+        tau_vf += self.jt.apply('h_heel_%s' % swing, [0, 5.0 * g, 0])
+        tau_vf += self.jt.apply('h_toe_%s' % swing, [0, 5.0 * g, 0])
 
         # # Locate a swing foot step
         # if 0.0 < phase_t:
@@ -116,7 +120,16 @@ class Controller:
             dH = skel.body('h_head').Cdot
             Hhat = self.motion.ref_head_at_frame((i + 1) * 800)
             force = -2000.0 * (H - Hhat) - 20.0 * dH
-            tau += self.jt.apply('h_head', force)
+            tau_vf += self.jt.apply('h_head', force)
+
+        if (frame_index % 200) < 3:
+            print '**** controller:', t, frame_index
+            print 'p', p
+            print 'd', d
+            print 'constraint', skel.constraint_forces()
+            print 'real constraint', cnstr
+            print 'tau', tau
+            print 'tau_vf', tau_vf
 
         # # Lateral balance
         # if 0.0 < phase_t:
@@ -134,6 +147,7 @@ class Controller:
         #     tau += self.jt.apply('h_heel_left', [0, 500, 0])
 
         # Make sure the first six are zero
+        tau += tau_vf
         tau[:6] = 0
         self.history['q'].append(skel.q)
         self.history['q_ref'].append(self.q_ref)
