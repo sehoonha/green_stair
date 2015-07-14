@@ -122,14 +122,14 @@ class Controller:
             force = -2000.0 * (H - Hhat) - 20.0 * dH
             tau_vf += self.jt.apply('h_head', force)
 
-        if (frame_index % 200) < 3:
-            print '**** controller:', t, frame_index
-            print 'p', p
-            print 'd', d
-            print 'constraint', skel.constraint_forces()
-            print 'real constraint', cnstr
-            print 'tau', tau
-            print 'tau_vf', tau_vf
+        # if (frame_index % 200) < 3:
+        #     print '**** controller:', t, frame_index
+        #     print 'p', p
+        #     print 'd', d
+        #     print 'constraint', skel.constraint_forces()
+        #     print 'real constraint', cnstr
+        #     print 'tau', tau
+        #     print 'tau_vf', tau_vf
 
         # # Lateral balance
         # if 0.0 < phase_t:

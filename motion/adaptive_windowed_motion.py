@@ -60,7 +60,7 @@ class Sample(object):
         # During the time_window
         while t < self.t0 + self.dt:
             # Step
-            print '---', t, frame, self.skel.C, self.skel.Cdot
+            # print '---', t, frame, self.skel.C, self.skel.Cdot
             sim.step()
             # Evaluate
             self.evaluate_frame(t, frame)
@@ -383,8 +383,8 @@ class FBSample(Sample):
             self.logger.info('    curr : %.4f' % sim_score)
             self.logger.info('    task_score : %.4f' %
                              self.task_score(task))
-            self.logger.info('    score : %.4f' %
-                             self.score())
+        self.logger.info('    score : %.4f' %
+                         self.score())
 
 
 class AdaptiveWindowedMotion(ParameterizedMotion):
@@ -393,10 +393,10 @@ class AdaptiveWindowedMotion(ParameterizedMotion):
         self.set_stair_info(stair)
         self.logger = logging.getLogger(__name__)
         self.sequence = []
-        self.T = 0.4
+        self.T = 0.8
         self.dt = 0.2
         # self.tasks = [0.0, 0.2]
-        self.tasks = [0.2]
+        self.tasks = [0.0, 0.1, 0.2]
         self.current_sample = None
         self.prev_index = -1
         self.saved_samples = []
@@ -461,8 +461,8 @@ class AdaptiveWindowedMotion(ParameterizedMotion):
         dt = self.dt
         prev_samples = [None]
         all_samples = list()
-        n_iter_samples = 50
-        n_saved_samples = 5
+        n_iter_samples = 4000
+        n_saved_samples = 500
         self.saved_samples = []
 
         for t0 in np.arange(0.0, T, dt):
@@ -558,10 +558,10 @@ class AdaptiveWindowedMotion(ParameterizedMotion):
             s = FBSample(self, t0, dt, prev)
             dim = s.num_params()
             m = np.zeros(dim)
-            C = 0.15 * np.identity(dim)
+            C = 0.05 * np.identity(dim)
             params = np.random.multivariate_normal(m, C)
-            # s.set_params(params)
-            s.set_params(m)
+            s.set_params(params)
+            # s.set_params(m)
         return s
 
     def select_samples(self, samples, n_saved_samples):
@@ -622,7 +622,7 @@ class AdaptiveWindowedMotion(ParameterizedMotion):
             reset_state = np.array(self.skel.world.x)
             # self.skel.world.reset()
             self.skel.world.x = reset_state
-            print '============ manual reset', frame_index
+            # print '============ manual reset', frame_index
 
         if self.current_sample is None:
             # Fetch time information
@@ -634,22 +634,20 @@ class AdaptiveWindowedMotion(ParameterizedMotion):
             q1 = q0 + self.swing_thigh_offset(t)
 
             if win_index >= len(self.sequence):
-                if (frame_index % 200) < 3:
-                    print '---', t, frame_index, self.skel.C, self.skel.Cdot
-                #     print '---', t, frame_index, '---'
-                #     print self.sim.world.x
+                # if (frame_index % 200) < 3:
+                #     print '---', t, frame_index, self.skel.C, self.skel.Cdot
                 return q1
             s = self.sequence[win_index]
             q2 = q1 + s.delta(t)
 
-            if (frame_index % 200) < 3:
-                print '---', t, frame_index, self.skel.C, self.skel.Cdot
-                print '))', s.params
-                print '))))', s.prev_ff_sample.task
-                print '))))', s.prev_ff_sample.params
-                print 'delta:', s.delta(t)
-                print 'ret:', q2
-                print self.sim.world.x
+            # if (frame_index % 200) < 3:
+            #     print '---', t, frame_index, self.skel.C, self.skel.Cdot
+            #     print '))', s.params
+            #     print '))))', s.prev_ff_sample.task
+            #     print '))))', s.prev_ff_sample.params
+            #     print 'delta:', s.delta(t)
+            #     print 'ret:', q2
+            #     print self.sim.world.x
             self.prev_index = frame_index
             return q2
         else:
@@ -657,14 +655,14 @@ class AdaptiveWindowedMotion(ParameterizedMotion):
             t = float(frame_index) * self.h
             q0 = self.pose_at_frame(frame_index, isRef=True)
             q = q0 + s.delta(t) + self.swing_thigh_offset(t)
-            if (frame_index % 200) < 3:
-                print '---', t, frame_index, self.skel.C, self.skel.Cdot
-                print '))', s.params
-                if isinstance(s, FBSample):
-                    print '))))', s.prev_ff_sample.task
-                    print '))))', s.prev_ff_sample.params
-                print 'delta:', s.delta(t)
-                print 'ret:', q
-                print self.sim.world.x
+            # if (frame_index % 200) < 3:
+            #     print '---', t, frame_index, self.skel.C, self.skel.Cdot
+            #     print '))', s.params
+            #     if isinstance(s, FBSample):
+            #         print '))))', s.prev_ff_sample.task
+            #         print '))))', s.prev_ff_sample.params
+            #     print 'delta:', s.delta(t)
+            #     print 'ret:', q
+            #     print self.sim.world.x
             self.prev_index = frame_index
             return q
