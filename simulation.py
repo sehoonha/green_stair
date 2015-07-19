@@ -48,6 +48,7 @@ class Simulation(object):
         self.ref = FileInfoWorld()
         self.ref.load('data/other/halfCycle.txt')
         logger.info('load reference motions OK: # %d' % self.ref.num_frames)
+        self.ref.modify_pose(self.skel)
         self.ref.append_mirrored_motion(self.skel)
         self.ref.append_shifted_motion(self.skel)
         self.ref.add_offset()
@@ -127,6 +128,8 @@ class Simulation(object):
         # print [self.stair.step_height(j) for j in range(3)]
 
         self.world.step()
+        # # Debug purpose
+        # self.skel.q = self.motion.pose_at_frame(i, isRef=True)
 
     def num_frames(self):
         return self.world.num_frames()

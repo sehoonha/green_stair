@@ -11,6 +11,29 @@ def optimizer_worker(motion):
     motion.solve()
 
 
+def mat2euler(_M, cy_thresh=None):
+    M = np.asarray(_M)
+    M = M[:3, :3]
+    if cy_thresh is None:
+        try:
+            cy_thresh = np.finfo(M.dtype).eps * 4
+        except ValueError:
+            cy_thresh = np._FLOAT_EPS_4
+    r11, r12, r13, r21, r22, r23, r31, r32, r33 = M.flat
+    # cy: sqrt((cos(y)*cos(z))**2 + (cos(x)*cos(y))**2)
+    cy = math.sqrt(r33 * r33 + r23 * r23)
+    if cy > cy_thresh:  # cos(y) not close to zero, standard form
+        z = math.atan2(-r12, r11)  # atan2(cos(y)*sin(z), cos(y)*cos(z))
+        y = math.atan2(r13, cy)  # atan2(sin(y), cy)
+        x = math.atan2(-r23, r33)  # atan2(cos(y)*sin(x), cos(x)*cos(y))
+    else:  # cos(y) (close to) zero, so x -> 0.0 (see above)
+        # so r21 -> sin(z), r22 -> cos(z) and
+        z = math.atan2(r21, r22)
+        y = math.atan2(r13, cy)  # atan2(sin(y), cy)
+        x = 0.0
+    return z, y, x
+
+
 class Sample(object):
     def __init__(self, motion, t0, dt):
         self.motion = motion
@@ -98,12 +121,12 @@ class Sample(object):
         qdot = skel.qdot
         qdot_hat = self.motion.ref_velocity_at_frame(frame)
         qdot_diff = qdot - qdot_hat
-        v['qdot'] += (0.02 / (skel.ndofs)) * 0.5 * norm(qdot_diff) ** 2
+        v['qdot'] += (0.04 / (skel.ndofs)) * 0.5 * norm(qdot_diff) ** 2
 
         # Measure v['C']
         C = skel.C
         Chat = self.motion.ref_com_at_frame(frame)
-        v['C'] += 0.5 * 0.5 * (norm(C - Chat) ** 2)
+        v['C'] += 1.0 * 0.5 * (norm(C - Chat) ** 2)
 
         # Measure v['Cd']
         Cd = skel.Cdot
@@ -113,11 +136,11 @@ class Sample(object):
         else:
             Cdhat[0] *= 0.9
         Cdiff = (Cd - Cdhat) * np.array([1.0, 0.3, 5.0])
-        v['Cd'] += 3.0 * 0.5 * (norm(Cdiff) ** 2)
-        v['Cd'] += 3.0 * 0.5 * (Cd[1] ** 2)
+        v['Cd'] += 1.0 * 0.5 * (norm(Cdiff) ** 2)
+        v['Cd'] += 1.0 * 0.5 * (Cd[1] ** 2)
 
         # Measure v['FL']
-        w_fl = 100.0 if (0.6 <= t <= 1.6) else 2.0
+        w_fl = 300.0 if (0.6 <= t <= 1.6) else 2.0
         FL = skel.body('h_toe_left').C
         FLhat = self.motion.ref_lfoot_at_frame(frame)
         v['FL'] += w_fl * 0.5 * norm(FL - FLhat) ** 2
@@ -127,7 +150,7 @@ class Sample(object):
             v['FL'] += 1.0
 
         # Measure v['FR']
-        w_fr = 100.0 if (0.0 <= t <= 0.8) or (1.4 <= t <= 2.4) else 2.0
+        w_fr = 300.0 if (0.0 <= t <= 0.8) or (1.4 <= t <= 2.4) else 2.0
         FR = skel.body('h_toe_right').C
         FRhat = self.motion.ref_rfoot_at_frame(frame)
         v['FR'] += w_fr * 0.5 * norm(FR - FRhat) ** 2
@@ -139,7 +162,13 @@ class Sample(object):
         # Measure v['H']
         H = skel.body('h_head').C
         Hhat = self.motion.ref_head_at_frame(frame)
-        v['H'] += 0.5 * norm(H - Hhat) ** 2
+        v['H'] += 2.0 * norm(H - Hhat) ** 2
+
+        # Measure v['PA']
+        PT = self.skel.body('h_pelvis').T
+        (az, ay, ax) = mat2euler(PT)
+        angles = np.array([az, 2.0 * ay, ax])
+        v['PA'] = 0.5 * norm(angles) ** 2
 
     def log_values(self, logger):
         v = self.v
@@ -192,31 +221,9 @@ class FFSample(Sample):
         ret = SkelVector(ret, self.skel)
         # Adjust the lateral swing heel
         swFT = self.skel.body('h_toe_%s' % swing).T
-        (ax, ay, az) = self.mat2euler(swFT)
+        (ax, ay, az) = mat2euler(swFT)
         ret['j_heel_%s_2' % swing] += -5.0 * az
         return ret
-
-    def mat2euler(self, _M, cy_thresh=None):
-        M = np.asarray(_M)
-        M = M[:3, :3]
-        if cy_thresh is None:
-            try:
-                cy_thresh = np.finfo(M.dtype).eps * 4
-            except ValueError:
-                cy_thresh = np._FLOAT_EPS_4
-        r11, r12, r13, r21, r22, r23, r31, r32, r33 = M.flat
-        # cy: sqrt((cos(y)*cos(z))**2 + (cos(x)*cos(y))**2)
-        cy = math.sqrt(r33 * r33 + r23 * r23)
-        if cy > cy_thresh:  # cos(y) not close to zero, standard form
-            z = math.atan2(-r12, r11)  # atan2(cos(y)*sin(z), cos(y)*cos(z))
-            y = math.atan2(r13, cy)  # atan2(sin(y), cy)
-            x = math.atan2(-r23, r33)  # atan2(cos(y)*sin(x), cos(x)*cos(y))
-        else:  # cos(y) (close to) zero, so x -> 0.0 (see above)
-            # so r21 -> sin(z), r22 -> cos(z) and
-            z = math.atan2(r21, r22)
-            y = math.atan2(r13, cy)  # atan2(sin(y), cy)
-            x = 0.0
-        return z, y, x
 
     def prev_final_state(self):
         if self.prev_fb_sample is None:
@@ -395,8 +402,10 @@ class AdaptiveWindowedMotion(ParameterizedMotion):
         self.sequence = []
         self.T = 0.8
         self.dt = 0.2
-        # self.tasks = [0.0, 0.2]
-        self.tasks = [0.0, 0.1, 0.2]
+        # self.tasks = [0.0, 0.1]
+        # self.tasks = [0.0, 0.1, 0.2]
+        self.tasks = [0.0, 0.1, 0.2, 0.3]
+        # self.tasks = [0.0, 0.15, 0.3]
         self.current_sample = None
         self.prev_index = -1
         self.saved_samples = []
@@ -461,8 +470,8 @@ class AdaptiveWindowedMotion(ParameterizedMotion):
         dt = self.dt
         prev_samples = [None]
         all_samples = list()
-        n_iter_samples = 4000
-        n_saved_samples = 500
+        n_iter_samples = 3000
+        n_saved_samples = 300
         self.saved_samples = []
 
         for t0 in np.arange(0.0, T, dt):
@@ -612,11 +621,12 @@ class AdaptiveWindowedMotion(ParameterizedMotion):
         stance = 'right' if step_counter % 2 == 0 else 'left'
         ret['j_thigh_%s_z' % swing] += 0.2
         ret['j_thigh_%s_z' % stance] -= 0.2
-        ret['j_heel_%s_1' % stance] -= 0.3
+        ret['j_heel_%s_1' % stance] -= 0.5
         # print t, phase_t, ret
         return ret
 
     def parameterized_pose_at_frame(self, frame_index):
+
         # print self.skel.body('h_toe_right').C
         if (frame_index % 200) == 0:
             reset_state = np.array(self.skel.world.x)

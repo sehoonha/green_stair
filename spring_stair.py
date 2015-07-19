@@ -10,7 +10,8 @@ class SpringStair(object):
         self.step_duration = 0.8
 
         # Default stiffness
-        pound_per_inch = 21
+        # pound_per_inch = 21
+        pound_per_inch = 16
         kg_per_meter = (pound_per_inch * 0.453) / 0.0254
         K = kg_per_meter * 9.8
 

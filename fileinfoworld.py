@@ -45,6 +45,22 @@ class FileInfoWorld(object):
         n = len(self.skels)
         self.pose = [data[i * n:(i + 1) * n] for i in range(self.num_frames)]
 
+    def modify_pose(self, skel):
+        new_pose = []
+        for i in range(self.num_frames):
+            pose_frame = []
+            for j, q_j in enumerate(self.pose[i]):
+                if j == 0:
+                    q_j_new = posetools.ik_adjust(skel, q_j)
+                    pose_frame.append(q_j_new)
+                else:
+                    pose_frame.append(q_j)
+            # Collect to the new_pose
+            new_pose.append(pose_frame)
+        # Update the original pose
+        self.pose = new_pose
+        self.num_frames = len(self.pose)
+
     def append_mirrored_motion(self, skel):
         for i in range(self.num_frames):
             pose_frame = []
