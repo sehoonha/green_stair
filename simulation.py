@@ -6,6 +6,7 @@ from controller import Controller
 import gltools
 from spring_stair import SpringStair
 from motion import *
+from hyper import *
 from plotter_torque import PlotterTorque
 # from guppy import hpy
 
@@ -32,6 +33,7 @@ class Simulation(object):
 
         # Configure human
         self.skel = self.world.skels[0]
+        print 'Skeleton mass = ', self.skel.m
         for i, body in enumerate(self.skel.bodies):
             print i, body.name
         for i, dof in enumerate(self.skel.dofs):
@@ -187,6 +189,11 @@ class Simulation(object):
         # self.solver = Optimizer(self, self.motion)
         # self.solver.launch()
         self.motion.launch(self)
+
+    def optimize_hyper(self):
+        print('optimize hyper parameters')
+        h = StairLatch(self)
+        h.launch()
 
     def kill_optimizer(self):
         self.solver.to_be_killed = True

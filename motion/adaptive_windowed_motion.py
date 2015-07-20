@@ -140,7 +140,7 @@ class Sample(object):
         v['Cd'] += 1.0 * 0.5 * (Cd[1] ** 2)
 
         # Measure v['FL']
-        w_fl = 300.0 if (0.6 <= t <= 1.6) else 2.0
+        w_fl = 500.0 if (0.6 <= t <= 1.6) else 2.0
         FL = skel.body('h_toe_left').C
         FLhat = self.motion.ref_lfoot_at_frame(frame)
         v['FL'] += w_fl * 0.5 * norm(FL - FLhat) ** 2
@@ -470,8 +470,8 @@ class AdaptiveWindowedMotion(ParameterizedMotion):
         dt = self.dt
         prev_samples = [None]
         all_samples = list()
-        n_iter_samples = 3000
-        n_saved_samples = 300
+        n_iter_samples = 5000
+        n_saved_samples = 500
         self.saved_samples = []
 
         for t0 in np.arange(0.0, T, dt):

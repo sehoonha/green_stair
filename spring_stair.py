@@ -10,10 +10,17 @@ class SpringStair(object):
         self.step_duration = 0.8
 
         # Default stiffness
-        # pound_per_inch = 21
-        pound_per_inch = 16
+        pound_per_inch = 21
+        # pound_per_inch = 16
         kg_per_meter = (pound_per_inch * 0.453) / 0.0254
         K = kg_per_meter * 9.8
+        print 'pound_per_inch', pound_per_inch
+        print 'kg_per_meter', kg_per_meter
+        print 'K', K
+        print 'K/m', K / 80.0
+        print 'max spring force = ', K * 0.2
+        print 'gravity force = ', 80.0 * 9.8
+        print 'K can be...', 80.0 * 9.8 / 0.2
 
         # Collect the stairs
         self.stairs = []

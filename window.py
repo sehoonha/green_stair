@@ -18,6 +18,7 @@ class Window(PyDartQtWindow):
         self.refreshAction = self.createAction('Refresh', self.refreshEvent)
 
         self.optAction = self.createAction('Opt', self.optEvent)
+        self.optHyperAction = self.createAction('OptHyper', self.optHyperEvent)
         self.killAction = self.createAction('Kill', self.killEvent)
         self.plotAction = self.createAction('Plot', self.plotEvent)
 
@@ -42,7 +43,8 @@ class Window(PyDartQtWindow):
                               self.actSpin, None,
                               self.refreshAction,
                               self.solXSpin, self.solYSpin, None,
-                              self.optAction, self.killAction,
+                              self.optAction, self.optHyperAction,
+                              self.killAction,
                               self.plotAction, None]
         self.toolbar_actions[4:4] += my_toolbar_actions
 
@@ -102,6 +104,9 @@ class Window(PyDartQtWindow):
     def optEvent(self):
         self.sim.optimize()
         self.refreshEvent()
+
+    def optHyperEvent(self):
+        self.sim.optimize_hyper()
 
     def killEvent(self):
         self.sim.kill_optimizer()
